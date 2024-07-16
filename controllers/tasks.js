@@ -22,26 +22,26 @@ export async function getTask() {
 
 export async function addTask() {
   const { title, date, user } = req.body
-  let resposta = await addTaskDB(title, date, user)
-  res.json({ resposta })
+  await addTaskDB(title, date, user)
+  res.json({ message: 'OK' })
 }
 
 export async function deleteTask() {
   const { id } = req.body
-  let resposta = await deleteTaskDB(id)
-  res.json({ resposta })
+  await deleteTaskDB(id)
+  res.json({ message: 'OK' })
 }
 
 export async function updateTaskStatus() {
   const { id, status } = req.body //no arquivo antigo essa function estava tratando com tittle ao invés de id, lembrar de alterar o arquivo original
-  let resposta = await updateTaskStatusDB(id, status)
-  res.json({ resposta })
+  await updateTaskStatusDB(id, status)
+  res.json({ message: 'OK' })
 }
 
 export async function updateDescription() {
   const { id, description } = req.body
-  let resposta = await updateDescriptionDB(id, description)
-  res.json({ resposta })
+  await updateDescriptionDB(id, description)
+  res.json({ message: 'OK' })
 }
 
 const router = express.Router()
