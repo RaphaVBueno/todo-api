@@ -56,6 +56,6 @@ router.delete('/:id', deleteTask)
 
 router.post('/:id', updateTaskStatus)
 
-router.post('/:id', updateDescription)
+router.post('/:id/update-description', updateDescription)
 
 export default router
