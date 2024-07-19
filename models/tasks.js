@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config() // Carrega as variáveis de ambiente do arquivo .env
 
 const DATABASE_URL =
-  'postgres://postgres:SENHADODB@bueno-devs-todo-app-db.flycast:5432'
+  'postgres://postgres:LM9QLYAx4v4JMPI@bueno-devs-todo-app-db.flycast:5432'
 
 console.log(DATABASE_URL)
 

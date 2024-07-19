@@ -14,32 +14,37 @@ export async function getTaskList(req, res) {
   res.json({ resposta })
 }
 
-export async function getTask() {
-  const { id } = req.query
+export async function getTask(req, res) {
+  const { id } = req.params // Aqui, usamos req.params em vez de req.body
+  console.log(id)
   let resposta = await getTaskDB(id)
   res.json({ resposta })
 }
 
-export async function addTask() {
+export async function addTask(req, res) {
   const { title, date, user } = req.body
+  console.log(title, date, user)
   await addTaskDB(title, date, user)
   res.json({ message: 'OK' })
 }
 
-export async function deleteTask() {
-  const { id } = req.body
+export async function deleteTask(req, res) {
+  const { id } = req.params
+  console.log(id)
   await deleteTaskDB(id)
   res.json({ message: 'OK' })
 }
 
-export async function updateTaskStatus() {
-  const { id, status } = req.body //no arquivo antigo essa function estava tratando com tittle ao invés de id, lembrar de alterar o arquivo original
+export async function updateTaskStatus(req, res) {
+  const { id, status } = req.body
+  console.log(id)
   await updateTaskStatusDB(id, status)
   res.json({ message: 'OK' })
 }
 
-export async function updateDescription() {
+export async function updateDescription(req, res) {
   const { id, description } = req.body
+  console.log(description)
   await updateDescriptionDB(id, description)
   res.json({ message: 'OK' })
 }
