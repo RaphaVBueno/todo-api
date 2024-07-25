@@ -26,8 +26,8 @@ model Task {
   id          Int      @id @default(autoincrement())
   title       String
   status      Boolean
-  date        DateTime     ///arrumar uma forma para que a hora não seja considerada nese campo
-  descricao   String
+  date          DateTime @default(now()) @db.Date
+  description   String?
   userEmail   String
   user        Usuario  @relation(fields: [userEmail], references: [email])
 

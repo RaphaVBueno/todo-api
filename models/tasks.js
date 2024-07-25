@@ -63,7 +63,7 @@ export async function updateDescriptionDB(id, description) {
       id: id,
     },
     data: {
-      descricao: description,
+      description: description,
     },
   })
 }

@@ -1,8 +1,7 @@
 // Importa o PrismaClient
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function main() {
   // Adiciona o usuário
@@ -17,27 +16,27 @@ async function main() {
             title: 'estudar',
             status: false, // Ou true, dependendo do status da tarefa
             date: new Date(),
-            descricao: 'Tarefa de estudo',
+            description: 'Tarefa de estudo',
           },
           {
             title: 'jogar',
             status: false, // Ou true, dependendo do status da tarefa
             date: new Date(),
-            descricao: 'Tarefa de lazer',
+            description: 'Tarefa de lazer',
           },
         ],
       },
     },
-  });
+  })
 
-  console.log('Usuário e tarefas adicionados:', usuario);
+  console.log('Usuário e tarefas adicionados:', usuario)
 }
 
 // Executa a função principal e lida com possíveis erros
 main()
-  .catch(e => {
-    throw e;
+  .catch((e) => {
+    throw e
   })
   .finally(async () => {
-    await prisma.$disconnect();
-  });
+    await prisma.$disconnect()
+  })
