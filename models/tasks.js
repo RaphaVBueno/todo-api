@@ -1,53 +1,69 @@
-import postgres from 'postgres'
-import dotenv from 'dotenv'
+import { PrismaClient } from '@prisma/client'
 
-dotenv.config() // Carrega as variáveis de ambiente do arquivo .env
+const prisma = new PrismaClient()
 
-const DATABASE_URL =
-  'postgres://postgres:LM9QLYAx4v4JMPI@bueno-devs-todo-app-db.flycast:5432'
-
-console.log(DATABASE_URL)
-
-const sql = postgres(DATABASE_URL)
-
+// Função para obter tarefas por data
 export async function getTasksDB(date) {
-  let dados = await sql`
-  SELECT * FROM tasks WHERE date = ${date};
-  `
-  return dados
+  const tarefas = await prisma.task.findMany({
+    where: {
+      date: new Date(date),
+    },
+  })
+  console.log(tarefas)
+  return tarefas
 }
 
+// Função para obter uma tarefa por ID
 export async function getTaskDB(id) {
-  let dados = await sql`
-      SELECT * FROM tasks WHERE id = ${id};
-    `
-  return dados
+  const tarefa = await prisma.task.findUnique({
+    where: {
+      id: id,
+    },
+  })
+  return tarefa
 }
 
-export async function addTaskDB(title, date, user) {
-  await sql`
-    INSERT INTO tasks (title, status, date, user_email) VALUES (
-      ${title},
-      FALSE,
-      ${date},
-      ${user}
-    );
-  `
+// Função para adicionar uma nova tarefa
+export async function addTaskDB(title, date, userEmail) {
+  await prisma.task.create({
+    data: {
+      title: title,
+      status: false,
+      date: new Date(date),
+      userEmail: userEmail,
+    },
+  })
 }
 
+// Função para excluir uma tarefa por ID
 export async function deleteTaskDB(id) {
-  await sql`
-  DELETE FROM tasks WHERE id = ${id};`
+  await prisma.task.delete({
+    where: {
+      id: id,
+    },
+  })
 }
 
+// Função para atualizar o status de uma tarefa
 export async function updateTaskStatusDB(id, status) {
-  await sql`
-    UPDATE tasks SET status = ${status} WHERE id = ${id};
-  `
+  await prisma.task.update({
+    where: {
+      id: id,
+    },
+    data: {
+      status: status,
+    },
+  })
 }
 
+// Função para atualizar a descrição de uma tarefa
 export async function updateDescriptionDB(id, description) {
-  await sql`
-  UPDATE tasks SET description = ${description} WHERE id = ${id};
-`
+  await prisma.task.update({
+    where: {
+      id: id,
+    },
+    data: {
+      descricao: description,
+    },
+  })
 }

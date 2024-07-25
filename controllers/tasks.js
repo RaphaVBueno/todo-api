@@ -12,6 +12,7 @@ export async function getTaskList(req, res) {
   const { date } = req.query
   let resposta = await getTasksDB(date)
   res.json({ resposta })
+  console.log(resposta)
 }
 
 export async function getTask(req, res) {
@@ -19,11 +20,11 @@ export async function getTask(req, res) {
   console.log(id)
   let resposta = await getTaskDB(id)
   res.json({ resposta })
+  console.log(resposta)
 }
 
 export async function addTask(req, res) {
   const { title, date, user } = req.body
-  console.log(title, date, user)
   await addTaskDB(title, date, user)
   res.json({ message: 'OK' })
 }
