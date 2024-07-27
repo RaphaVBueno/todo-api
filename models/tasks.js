@@ -24,10 +24,10 @@ export async function getTaskDB(id) {
 export async function addTaskDB(title, date, userEmail) {
   await prisma.task.create({
     data: {
-      title: title,
+      title,
       status: false,
       date: new Date(date),
-      userEmail: userEmail,
+      userEmail,
     },
   })
 }
