@@ -2,7 +2,6 @@ import express from 'express'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const router = express.Router()
 
 async function getTaskList(req, res) {
   const tasks = await prisma.task.findMany({
@@ -71,6 +70,8 @@ async function updateDescription(req, res) {
   })
   res.json({ message: 'Descrição da tarefa atualizada com sucesso', task })
 }
+
+const router = express.Router()
 
 router.get('/', getTaskList)
 

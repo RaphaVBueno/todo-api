@@ -2,7 +2,6 @@ import express from 'express'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const router = express.Router()
 
 async function addList(req, res) {
   const { name } = req.body
@@ -39,6 +38,8 @@ async function deleteList(req, res) {
   })
   res.json({ message: 'Categoria deletada com sucesso', category })
 }
+
+const router = express.Router()
 
 router.post('/add', addList)
 

@@ -2,7 +2,6 @@ import express from 'express'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const router = express.Router()
 
 async function addTag(req, res) {
   const { name } = req.body
@@ -39,6 +38,8 @@ async function deleteTag(req, res) {
   })
   res.json({ message: 'Tag deletada com sucesso', tag })
 }
+
+const router = express.Router()
 
 router.post('/add', addTag)
 
