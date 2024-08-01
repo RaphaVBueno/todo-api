@@ -1,53 +1,76 @@
 import express from 'express'
-import {
-  getTasksDB,
-  getTaskDB,
-  addTaskDB,
-  deleteTaskDB,
-  updateTaskStatusDB,
-  updateDescriptionDB,
-} from '../models/tasks.js'
+import { PrismaClient } from '@prisma/client'
 
-export async function getTaskList(req, res) {
-  const { date } = req.query
-  let resposta = await getTasksDB(date)
-  res.json({ resposta })
+const prisma = new PrismaClient()
+const router = express.Router()
+
+async function getTaskList(req, res) {
+  const tasks = await prisma.task.findMany({
+    where: {
+      date: new Date(req.query.date),
+    },
+  })
+  res.json({ tasks })
 }
 
-export async function getTask(req, res) {
-  const { id } = req.params // Aqui, usamos req.params em vez de req.body
-  const idAsInt = parseInt(id, 10)
-  let resposta = await getTaskDB(idAsInt)
-  res.json({ resposta })
+async function getTask(req, res) {
+  const idAsInt = parseInt(req.params.id, 10)
+  const task = await prisma.task.findUnique({
+    where: { id: idAsInt },
+  })
+  res.json({ task })
 }
 
-export async function addTask(req, res) {
+async function addTask(req, res) {
   const { title, date, user } = req.body
-  await addTaskDB(title, date, user)
-  res.json({ message: 'OK' })
+  const task = await prisma.task.create({
+    data: {
+      title,
+      status: false,
+      date: new Date(date),
+      userEmail: user,
+    },
+  })
+  res.json({ message: 'Tarefa adicionada com sucesso', task })
 }
 
-export async function deleteTask(req, res) {
-  const { id } = req.params
-  const idAsInt = parseInt(id, 10)
-  await deleteTaskDB(idAsInt)
-  res.json({ message: 'OK' })
+async function deleteTask(req, res) {
+  const idAsInt = parseInt(req.params.id, 10)
+  await prisma.task.delete({
+    where: {
+      id: idAsInt,
+    },
+  })
+  res.json({ message: 'Tarefa deletada com sucesso' })
 }
 
-export async function updateTaskStatus(req, res) {
+async function updateTaskStatus(req, res) {
   const { id, status } = req.body
-  await updateTaskStatusDB(id, status)
-  res.json({ message: 'OK' })
+  const idAsInt = parseInt(id, 10)
+  const task = await prisma.task.update({
+    where: {
+      id: idAsInt,
+    },
+    data: {
+      status: status,
+    },
+  })
+  res.json({ message: 'Status da tarefa atualizado com sucesso', task })
 }
 
-export async function updateDescription(req, res) {
+async function updateDescription(req, res) {
   const { id, description } = req.body
   const idAsInt = parseInt(id, 10)
-  await updateDescriptionDB(idAsInt, description)
-  res.json({ message: 'OK' })
+  const task = await prisma.task.update({
+    where: {
+      id: idAsInt,
+    },
+    data: {
+      description: description,
+    },
+  })
+  res.json({ message: 'Descrição da tarefa atualizada com sucesso', task })
 }
-
-const router = express.Router()
 
 router.get('/', getTaskList)
 
@@ -57,7 +80,7 @@ router.post('/add', addTask)
 
 router.delete('/:id', deleteTask)
 
-router.post('/:id', updateTaskStatus)
+router.post('/:id/status', updateTaskStatus)
 
 router.post('/:id/update-description', updateDescription)
 

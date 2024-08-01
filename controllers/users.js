@@ -28,25 +28,31 @@ export async function addUser(req, res) {
   res.json({ message: 'Usuario adicionado com sucesso', user })
 }
 
-// export async function deleteUser(req, res) {
-//   const { id } = req.params
-//   const idAsInt = parseInt(id, 10)
-//   await deleteUserDB(idAsInt)
-//   res.json({ message: 'OK' })
-// }
+export async function deleteUser(req, res) {
+  const { id } = req.params
+  const idAsInt = parseInt(id, 10)
+  const user = await prisma.usuario.delete({
+    where: {
+      id: idAsInt,
+    },
+  })
+  res.json({ message: 'Usuario deletado com sucesso', user })
+}
 
-// export async function updateUserStatus(req, res) {
-//   const { id, status } = req.body
-//   await updateUserStatusDB(id, status)
-//   res.json({ message: 'OK' })
-// }
+export async function updateUser(req, res) {
+  const { email } = req.params
+  const { name, password } = req.body
 
-// export async function updateDescription(req, res) {
-//   const { id, description } = req.body
-//   const idAsInt = parseInt(id, 10)
-//   await updateDescriptionDB(idAsInt, description)
-//   res.json({ message: 'OK' })
-// }
+  const ser = await prisma.usuario.update({
+    where: { email },
+    data: {
+      name,
+      password,
+    },
+  })
+
+  res.json({ message: 'Usuario atualizado com sucesso', user })
+}
 
 const router = express.Router()
 
@@ -56,10 +62,8 @@ router.get('/:email', getUser)
 
 router.post('/add', addUser)
 
-// router.delete('/:id', deleteUser)
+router.delete('/:id', deleteUser)
 
-// router.post('/:id', updateUserStatus)
-
-// router.post('/:id/update-description', updateDescription)
+router.put('/:email', updateUser)
 
 export default router
