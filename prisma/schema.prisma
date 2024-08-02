@@ -18,9 +18,8 @@ model Usuario {
   name     String
   password String
   tasks    Task[]
-  //list     List[]
 
-  @@map("users")  /// considerar esse nome da tabela 
+  @@map("users")
 }
 
 model Task {
@@ -31,7 +30,6 @@ model Task {
   description   String?
   userEmail   String
   user        Usuario  @relation(fields: [userEmail], references: [email])
-  ///tag         Tag[]
 
   @@map("tasks")
 }
@@ -39,7 +37,6 @@ model Task {
 model List {
   id          Int      @id @default(autoincrement())
   name        String?
-  ///tasks    Task[]
 
   @@map("list")
 }

@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 async function addList(req, res) {
   const { name } = req.body
-  const category = await prisma.categoria.create({
+  const category = await prisma.list.create({
     data: {
       name,
     },
@@ -17,7 +17,7 @@ async function updateList(req, res) {
   const { id } = req.params
   const idAsInt = parseInt(id, 10)
   const { name } = req.body
-  const category = await prisma.categoria.update({
+  const category = await prisma.list.update({
     where: {
       id: idAsInt,
     },
@@ -31,7 +31,7 @@ async function updateList(req, res) {
 async function deleteList(req, res) {
   const { id } = req.params
   const idAsInt = parseInt(id, 10)
-  const category = await prisma.categoria.delete({
+  const category = await prisma.list.delete({
     where: {
       id: idAsInt,
     },
@@ -39,7 +39,27 @@ async function deleteList(req, res) {
   res.json({ message: 'Categoria deletada com sucesso', category })
 }
 
+async function getListList(req, res) {
+  const categories = await prisma.list.findMany()
+  res.json({ categories })
+}
+
+async function getList(req, res) {
+  const { id } = req.params
+  const idAsInt = parseInt(id, 10)
+  const category = await prisma.list.findUnique({
+    where: {
+      id: idAsInt,
+    },
+  })
+  res.json({ category })
+}
+
 const router = express.Router()
+
+router.get('/', getListList)
+
+router.get('/:id', getList)
 
 router.post('/add', addList)
 

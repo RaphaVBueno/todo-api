@@ -43,7 +43,7 @@ export async function updateUser(req, res) {
   const { email } = req.params
   const { name, password } = req.body
 
-  const ser = await prisma.usuario.update({
+  const user = await prisma.usuario.update({
     where: { email },
     data: {
       name,

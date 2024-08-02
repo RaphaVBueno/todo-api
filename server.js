@@ -14,8 +14,8 @@ app.use(express.json())
 
 app.use('/tasks', tasks)
 app.use('/users', users)
-app.use('/list', tasks)
-app.use('/tag', tasks)
+app.use('/list', list)
+app.use('/tag', tag)
 
 const port = 3000
 

@@ -39,7 +39,27 @@ async function deleteTag(req, res) {
   res.json({ message: 'Tag deletada com sucesso', tag })
 }
 
+async function getTagList(req, res) {
+  const tags = await prisma.tag.findMany()
+  res.json({ tags })
+}
+
+async function getTag(req, res) {
+  const { id } = req.params
+  const idAsInt = parseInt(id, 10)
+  const tag = await prisma.tag.findUnique({
+    where: {
+      id: idAsInt,
+    },
+  })
+  res.json({ tag })
+}
+
 const router = express.Router()
+
+router.get('/', getTagList)
+
+router.get('/:id', getTag)
 
 router.post('/add', addTag)
 
