@@ -29,7 +29,7 @@ model Task {
   date          DateTime @default(now()) @db.Date
   description   String?
   userEmail   String
-  user        Usuario  @relation(fields: [userEmail], references: [email])
+  user        Usuario  @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 
   @@map("tasks")
 }

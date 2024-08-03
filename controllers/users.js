@@ -9,7 +9,7 @@ export async function getUserList(req, res) {
 }
 
 export async function getUser(req, res) {
-  const { email } = req.params // Aqui, usamos req.params em vez de req.body
+  const { email } = req.params
   const user = await prisma.usuario.findUnique({
     where: { email },
   })
@@ -29,11 +29,11 @@ export async function addUser(req, res) {
 }
 
 export async function deleteUser(req, res) {
-  const { id } = req.params
-  const idAsInt = parseInt(id, 10)
+  const { email } = req.body
+  console.log(req.body)
   const user = await prisma.usuario.delete({
     where: {
-      id: idAsInt,
+      email,
     },
   })
   res.json({ message: 'Usuario deletado com sucesso', user })
@@ -62,7 +62,7 @@ router.get('/:email', getUser)
 
 router.post('/add', addUser)
 
-router.delete('/:id', deleteUser)
+router.delete('/', deleteUser)
 
 router.put('/:email', updateUser)
 
