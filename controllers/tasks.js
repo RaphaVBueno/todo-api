@@ -21,13 +21,13 @@ async function getTask(req, res) {
 }
 
 async function addTask(req, res) {
-  const { title, date, user } = req.body
+  const { title, date, userId } = req.body
   const task = await prisma.task.create({
     data: {
       title,
       status: false,
       date: new Date(date),
-      userEmail: user,
+      userId,
     },
   })
   res.json({ message: 'Tarefa adicionada com sucesso', task })
@@ -43,32 +43,26 @@ async function deleteTask(req, res) {
   res.json({ message: 'Tarefa deletada com sucesso' })
 }
 
-async function updateTaskStatus(req, res) {
-  const { id, status } = req.body
+async function updateTask(req, res) {
+  const { id, status, description } = req.body
   const idAsInt = parseInt(id, 10)
-  const task = await prisma.task.update({
-    where: {
-      id: idAsInt,
-    },
-    data: {
-      status: status,
-    },
-  })
-  res.json({ message: 'Status da tarefa atualizado com sucesso', task })
-}
 
-async function updateDescription(req, res) {
-  const { id, description } = req.body
-  const idAsInt = parseInt(id, 10)
+  const data = {}
+  if (status !== undefined) {
+    data.status = status
+  }
+  if (description !== undefined) {
+    data.description = description
+  }
+
   const task = await prisma.task.update({
     where: {
       id: idAsInt,
     },
-    data: {
-      description: description,
-    },
+    data: data,
   })
-  res.json({ message: 'Descrição da tarefa atualizada com sucesso', task })
+
+  res.json({ message: 'Tarefa atualizada com sucesso', task })
 }
 
 const router = express.Router()
@@ -81,8 +75,6 @@ router.post('/add', addTask)
 
 router.delete('/:id', deleteTask)
 
-router.post('/:id/status', updateTaskStatus)
-
-router.post('/:id/update-description', updateDescription)
+router.post('/:id/update', updateTask)
 
 export default router

@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.8",
-    "@prisma/client": "^5.17.0",
-    "prisma": "^5.17.0"
+    "@prisma/client": "^5.18.0",
+    "prisma": "^5.18.0"
   }
 }

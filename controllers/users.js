@@ -9,9 +9,9 @@ export async function getUserList(req, res) {
 }
 
 export async function getUser(req, res) {
-  const { email } = req.params
+  const id = parseInt(req.params.id, 10)
   const user = await prisma.usuario.findUnique({
-    where: { email },
+    where: { id },
   })
   res.json({ user })
 }
@@ -29,25 +29,25 @@ export async function addUser(req, res) {
 }
 
 export async function deleteUser(req, res) {
-  const { email } = req.body
+  const { id } = req.body
   console.log(req.body)
   const user = await prisma.usuario.delete({
     where: {
-      email,
+      id,
     },
   })
   res.json({ message: 'Usuario deletado com sucesso', user })
 }
 
 export async function updateUser(req, res) {
-  const { email } = req.params
-  const { name, password } = req.body
+  const { name, password, id, email } = req.body
 
   const user = await prisma.usuario.update({
-    where: { email },
+    where: { id },
     data: {
       name,
       password,
+      email,
     },
   })
 
@@ -58,12 +58,12 @@ const router = express.Router()
 
 router.get('/', getUserList)
 
-router.get('/:email', getUser)
+router.get('/:id', getUser)
 
 router.post('/add', addUser)
 
 router.delete('/', deleteUser)
 
-router.put('/:email', updateUser)
+router.put('/', updateUser)
 
 export default router

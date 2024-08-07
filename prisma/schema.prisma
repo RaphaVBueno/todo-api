@@ -14,22 +14,28 @@ datasource db {
 }
 
 model Usuario {
-  email    String   @id @default(cuid())
-  name     String
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String   
   password String
   tasks    Task[]
+  lists    List[]
 
   @@map("users")
 }
 
 model Task {
-  id          Int      @id @default(autoincrement())
-  title       String
-  status      Boolean
+  id            Int      @id @default(autoincrement())
+  title         String
+  status        Boolean
   date          DateTime @default(now()) @db.Date
   description   String?
-  userEmail   String
-  user        Usuario  @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  userId        Int
+  listId        Int?
+  tagId         Int?
+  user          Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  list          List?    @relation(fields: [listId], references: [id])
+  tag           Tag?     @relation(fields: [tagId], references: [id])
 
   @@map("tasks")
 }
@@ -37,13 +43,17 @@ model Task {
 model List {
   id          Int      @id @default(autoincrement())
   name        String?
+  userId      Int
+  user        Usuario  @relation(fields: [userId], references: [id])
+  tasks       Task[]
 
-  @@map("list")
+  @@map("lists")
 }
 
 model Tag {
-  id    Int    @id @default(autoincrement())
+  id    Int      @id @default(autoincrement())
   name  String?
+  tasks Task[]
 
   @@map("tags")
 }
