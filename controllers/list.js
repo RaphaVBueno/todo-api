@@ -4,10 +4,14 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function addList(req, res) {
-  const { name } = req.body
+  const { listName, userId } = req.body
+  const id = parseInt(userId, 10)
   const category = await prisma.list.create({
     data: {
-      name,
+      name: listName,
+      user: {
+        connect: { id: id },
+      },
     },
   })
   res.json({ message: 'Categoria adicionada com sucesso', category })

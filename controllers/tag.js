@@ -4,10 +4,11 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function addTag(req, res) {
-  const { name } = req.body
+  const { name, userId } = req.body
   const tag = await prisma.tag.create({
     data: {
       name,
+      userId,
     },
   })
   res.json({ message: 'Tag adicionada com sucesso', tag })
