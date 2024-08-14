@@ -5,11 +5,10 @@ const prisma = new PrismaClient()
 const router = express.Router()
 
 async function getTaskList(req, res) {
-  const { userId, date } = req.body
-
+  const { userId, date } = req.query
   const tasks = await prisma.task.findMany({
     where: {
-      date,
+      date: new Date(date),
       userId: parseInt(userId, 10),
     },
   })
@@ -49,19 +48,21 @@ async function deleteTask(req, res) {
 }
 
 async function updateTaskStatus(req, res) {
-  const { id, status } = req.body
+  const { id, status, description } = req.body
   const idAsInt = parseInt(id, 10)
   const task = await prisma.task.update({
     where: {
       id: idAsInt,
     },
     data: {
-      status: status,
+      status,
+      description,
     },
   })
   res.json({ message: 'Status da tarefa atualizado com sucesso', task })
 }
 
+//ESSA FUNÇÃO PODE SER DELETADA
 async function updateDescription(req, res) {
   const { id, description } = req.body
   const idAsInt = parseInt(id, 10)

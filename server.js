@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.use('/tasks', tasks)
-app.use('/users', users)
+app.use('/user', users)
 app.use('/list', list)
 app.use('/tag', tag)
 
