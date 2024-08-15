@@ -9,7 +9,7 @@ async function getTaskList(req, res) {
   const tasks = await prisma.task.findMany({
     where: {
       date: new Date(date),
-      userId: parseInt(userId, 10),
+      userId: Number(userId),
     },
   })
 
@@ -17,9 +17,8 @@ async function getTaskList(req, res) {
 }
 
 async function getTask(req, res) {
-  const idAsInt = parseInt(req.params.id, 10)
   const task = await prisma.task.findUnique({
-    where: { id: idAsInt },
+    where: { id: Number(req.params.id) },
   })
   res.json({ task })
 }
@@ -38,43 +37,30 @@ async function addTask(req, res) {
 }
 
 async function deleteTask(req, res) {
-  const idAsInt = parseInt(req.params.id, 10)
+  //não seria necessário verificar o userId antes de deletar
+  const { userId, id } = req.query
   await prisma.task.delete({
     where: {
-      id: idAsInt,
+      id: Number(id),
     },
   })
-  res.json({ message: 'Tarefa deletada com sucesso' })
+
+  return res.json({ message: 'Tarefa deletada com sucesso' })
 }
 
 async function updateTaskStatus(req, res) {
-  const { id, status, description } = req.body
-  const idAsInt = parseInt(id, 10)
+  const { id, status, description, title } = req.body
   const task = await prisma.task.update({
     where: {
-      id: idAsInt,
+      id: Number(id),
     },
     data: {
       status,
       description,
+      title,
     },
   })
   res.json({ message: 'Status da tarefa atualizado com sucesso', task })
-}
-
-//ESSA FUNÇÃO PODE SER DELETADA
-async function updateDescription(req, res) {
-  const { id, description } = req.body
-  const idAsInt = parseInt(id, 10)
-  const task = await prisma.task.update({
-    where: {
-      id: idAsInt,
-    },
-    data: {
-      description: description,
-    },
-  })
-  res.json({ message: 'Descrição da tarefa atualizada com sucesso', task })
 }
 
 router.get('/', getTaskList)
@@ -85,8 +71,6 @@ router.post('/add', addTask)
 
 router.delete('/:id', deleteTask)
 
-router.post('/:id/status', updateTaskStatus)
-
-router.post('/:id/update-description', updateDescription)
+router.post('/:id', updateTaskStatus)
 
 export default router
