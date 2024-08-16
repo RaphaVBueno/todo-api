@@ -63,6 +63,18 @@ async function updateTaskStatus(req, res) {
   res.json({ message: 'Status da tarefa atualizado com sucesso', task })
 }
 
+async function addToList(req, res) {
+  const { id, listId } = req.body
+  console.log(id)
+  console.log(listId)
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(id) },
+    data: { listId: Number(listId) },
+  })
+
+  return res.json({ message: 'Lista Adicionada com sucesso', updatedTask })
+}
+
 router.get('/', getTaskList)
 
 router.get('/:id', getTask)
@@ -71,6 +83,8 @@ router.post('/add', addTask)
 
 router.delete('/:id', deleteTask)
 
-router.post('/:id', updateTaskStatus)
+router.post('/:id/update', updateTaskStatus)
+
+router.post('/addtolist', addToList)
 
 export default router
