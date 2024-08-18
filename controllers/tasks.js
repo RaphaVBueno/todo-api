@@ -11,6 +11,7 @@ async function getTaskList(req, res) {
       date: new Date(date),
       userId: Number(userId),
     },
+    include: { tags: true },
   })
 
   res.json({ tasks })
@@ -19,6 +20,7 @@ async function getTaskList(req, res) {
 async function getTask(req, res) {
   const task = await prisma.task.findUnique({
     where: { id: Number(req.params.id) },
+    include: { tags: true },
   })
   res.json({ task })
 }
@@ -75,6 +77,23 @@ async function addToList(req, res) {
   return res.json({ message: 'Lista Adicionada com sucesso', updatedTask })
 }
 
+async function addToTag(req, res) {
+  const { taskId, tagId } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(taskId) },
+    data: {
+      tags: {
+        connect: { id: Number(tagId) },
+      },
+    },
+  })
+
+  return res.json({
+    message: 'Tag adicionada à tarefa com sucesso',
+    updatedTask,
+  })
+}
+
 router.get('/', getTaskList)
 
 router.get('/:id', getTask)
@@ -86,5 +105,7 @@ router.delete('/:id', deleteTask)
 router.post('/:id/update', updateTaskStatus)
 
 router.post('/addtolist', addToList)
+
+router.post('/addtotag', addToTag)
 
 export default router
