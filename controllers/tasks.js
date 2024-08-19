@@ -67,8 +67,6 @@ async function updateTaskStatus(req, res) {
 
 async function addToList(req, res) {
   const { id, listId } = req.body
-  console.log(id)
-  console.log(listId)
   const updatedTask = await prisma.task.update({
     where: { id: Number(id) },
     data: { listId: Number(listId) },
@@ -77,7 +75,17 @@ async function addToList(req, res) {
   return res.json({ message: 'Lista Adicionada com sucesso', updatedTask })
 }
 
-async function addToTag(req, res) {
+async function RemoveList(req, res) {
+  const { id } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(id) },
+    data: { listId: null },
+  })
+
+  return res.json({ message: 'Categoria removida com sucesso', updatedTask })
+}
+
+async function addTag(req, res) {
   const { taskId, tagId } = req.body
   const updatedTask = await prisma.task.update({
     where: { id: Number(taskId) },
@@ -87,9 +95,24 @@ async function addToTag(req, res) {
       },
     },
   })
-
   return res.json({
     message: 'Tag adicionada à tarefa com sucesso',
+    updatedTask,
+  })
+}
+
+async function removeTag(req, res) {
+  const { taskId, tagId } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(taskId) },
+    data: {
+      tags: {
+        disconnect: { id: Number(tagId) },
+      },
+    },
+  })
+  return res.json({
+    message: 'Tag removida da tarefa com sucesso',
     updatedTask,
   })
 }
@@ -106,6 +129,10 @@ router.post('/:id/update', updateTaskStatus)
 
 router.post('/addtolist', addToList)
 
-router.post('/addtotag', addToTag)
+router.post('/removelist', RemoveList)
+
+router.post('/addtotag', addTag)
+
+router.post('/removetag', removeTag)
 
 export default router
