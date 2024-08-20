@@ -56,6 +56,38 @@ async function getTag(req, res) {
   res.json({ tag })
 }
 
+async function addToTag(req, res) {
+  const { taskId, tagId } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(taskId) },
+    data: {
+      tags: {
+        connect: { id: Number(tagId) },
+      },
+    },
+  })
+  return res.json({
+    message: 'Tag adicionada à tarefa com sucesso',
+    updatedTask,
+  })
+}
+
+async function removeTag(req, res) {
+  const { taskId, tagId } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(taskId) },
+    data: {
+      tags: {
+        disconnect: { id: Number(tagId) },
+      },
+    },
+  })
+  return res.json({
+    message: 'Tag removida da tarefa com sucesso',
+    updatedTask,
+  })
+}
+
 const router = express.Router()
 
 router.get('/', getTagList)
@@ -67,5 +99,9 @@ router.post('/add', addTag)
 router.put('/:id/edit', updateTag)
 
 router.delete('/:id', deleteTag)
+
+router.post('/addtotag', addToTag)
+
+router.post('/removetag', removeTag)
 
 export default router

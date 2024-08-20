@@ -59,6 +59,26 @@ async function getList(req, res) {
   res.json({ category })
 }
 
+async function addToList(req, res) {
+  const { id, listId } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(id) },
+    data: { listId: Number(listId) },
+  })
+
+  return res.json({ message: 'Lista Adicionada com sucesso', updatedTask })
+}
+
+async function RemoveList(req, res) {
+  const { id } = req.body
+  const updatedTask = await prisma.task.update({
+    where: { id: Number(id) },
+    data: { listId: null },
+  })
+
+  return res.json({ message: 'Categoria removida com sucesso', updatedTask })
+}
+
 const router = express.Router()
 
 router.get('/', getListList)
@@ -70,5 +90,9 @@ router.post('/add', addList)
 router.put('/:id/edit', updateList)
 
 router.delete('/:id', deleteList)
+
+router.post('/addtolist', addToList)
+
+router.post('/removelist', RemoveList)
 
 export default router
