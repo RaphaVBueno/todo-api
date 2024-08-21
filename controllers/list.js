@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-async function addList(req, res) {
+export async function addList(req, res) {
   const { listName, userId } = req.body
   const id = parseInt(userId, 10)
   const category = await prisma.list.create({
@@ -14,10 +14,10 @@ async function addList(req, res) {
       },
     },
   })
-  res.json({ message: 'Categoria adicionada com sucesso', category })
+  res.json({ message: 'categoria adicionada com sucesso', category })
 }
 
-async function updateList(req, res) {
+export async function updateList(req, res) {
   const { id } = req.params
   const idAsInt = parseInt(id, 10)
   const { name } = req.body
@@ -32,7 +32,7 @@ async function updateList(req, res) {
   res.json({ message: 'Categoria editada com sucesso', category })
 }
 
-async function deleteList(req, res) {
+export async function deleteList(req, res) {
   const { id } = req.params
   const idAsInt = parseInt(id, 10)
   const category = await prisma.list.delete({
@@ -43,12 +43,12 @@ async function deleteList(req, res) {
   res.json({ message: 'Categoria deletada com sucesso', category })
 }
 
-async function getListList(req, res) {
+export async function getListList(req, res) {
   const categories = await prisma.list.findMany()
   res.json({ categories })
 }
 
-async function getList(req, res) {
+export async function getList(req, res) {
   const { id } = req.params
   const idAsInt = parseInt(id, 10)
   const category = await prisma.list.findUnique({
@@ -59,7 +59,7 @@ async function getList(req, res) {
   res.json({ category })
 }
 
-async function addToList(req, res) {
+export async function addToList(req, res) {
   const { id, listId } = req.body
   const updatedTask = await prisma.task.update({
     where: { id: Number(id) },
@@ -69,7 +69,7 @@ async function addToList(req, res) {
   return res.json({ message: 'Lista Adicionada com sucesso', updatedTask })
 }
 
-async function RemoveList(req, res) {
+export async function RemoveList(req, res) {
   const { id } = req.body
   const updatedTask = await prisma.task.update({
     where: { id: Number(id) },

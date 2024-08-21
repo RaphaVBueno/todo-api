@@ -7,6 +7,7 @@ import {
   updateTaskStatus,
 } from './tasks'
 import { PrismaClient } from '@prisma/client'
+import { mockedTasks } from '../utils'
 
 // Mock do Prisma Client
 vi.mock('@prisma/client', () => {
@@ -31,26 +32,8 @@ describe('Testando as funções da API de Tarefas', () => {
 
   it('getTaskList - deve retornar a lista de tarefas', async () => {
     const mockTasks = [
-      {
-        id: 1,
-        title: 'Tarefa 1',
-        status: false,
-        date: new Date(),
-        description: null,
-        userId: 1,
-        listId: null,
-        tags: [],
-      },
-      {
-        id: 2,
-        title: 'Tarefa 2',
-        status: false,
-        date: new Date(),
-        description: null,
-        userId: 1,
-        listId: null,
-        tags: [],
-      },
+      mockedTasks(1, 'tarefa 1', false, '2024-08-21', null, 1, null, []),
+      mockedTasks(2, 'tarefa 2', false, '2024-08-21', null, 1, null, []),
     ]
 
     // Mock da função prisma.task.findMany
@@ -78,18 +61,9 @@ describe('Testando as funções da API de Tarefas', () => {
 })
 
 it('getTask - deve retornar uma tarefa especifica', async () => {
-  const mockTasks = {
-    id: 1,
-    title: 'Tarefa 1',
-    status: false,
-    date: new Date(),
-    description: null,
-    userId: 1,
-    listId: null,
-    tags: [],
-  }
-
-  prisma.task.findUnique.mockResolvedValue(mockTasks)
+  prisma.task.findUnique.mockResolvedValue(
+    mockedTasks(1, 'tarefa 1', false, '2024-08-21', null, 1, null, [])
+  )
 
   const req = { params: { id: 1 } }
   const res = { json: vi.fn() }
@@ -99,22 +73,15 @@ it('getTask - deve retornar uma tarefa especifica', async () => {
     where: { id: 1 },
     include: { tags: true },
   })
-  expect(res.json).toHaveBeenCalledWith({ task: mockTasks })
+  expect(res.json).toHaveBeenCalledWith({
+    task: mockedTasks(1, 'tarefa 1', false, '2024-08-21', null, 1, null, []),
+  })
 })
 
 it('addTask - deve adicionar uma nova tarefa', async () => {
-  const newTask = {
-    id: 1,
-    title: 'nova tarefa',
-    status: false,
-    date: new Date(),
-    description: null,
-    userId: 1,
-    listId: null,
-    tags: [],
-  } //isso seria o que eu queria ver no meu banco de dados?
-
-  prisma.task.create.mockResolvedValue(newTask)
+  prisma.task.create.mockResolvedValue(
+    mockedTasks(1, 'nova tarefa', false, '2024-08-21', null, 1, null, [])
+  )
 
   const req = {
     body: { title: 'nova tarefa', date: new Date().toISOString(), userId: 1 },
@@ -135,23 +102,23 @@ it('addTask - deve adicionar uma nova tarefa', async () => {
 
   expect(res.json).toHaveBeenCalledWith({
     message: 'Tarefa adicionada com sucesso',
-    task: newTask,
+    task: mockedTasks(1, 'nova tarefa', false, '2024-08-21', null, 1, null, []),
   })
 })
 
 it('updateTaskStatuss - deve atualizar uma tarefa', async () => {
-  const mockTasks = {
-    id: 1,
-    title: 'tarefa 1',
-    status: true,
-    date: new Date(),
-    description: 'decrição de teste',
-    userId: 1,
-    listId: null,
-    tags: [],
-  }
-
-  prisma.task.update.mockResolvedValue(mockTasks)
+  prisma.task.update.mockResolvedValue(
+    mockedTasks(
+      1,
+      'tarefa 1',
+      true,
+      '2024-08-21',
+      'descrição de teste',
+      1,
+      null,
+      []
+    )
+  )
 
   const req = {
     body: {
@@ -175,7 +142,16 @@ it('updateTaskStatuss - deve atualizar uma tarefa', async () => {
 
   expect(res.json).toHaveBeenCalledWith({
     message: 'Tarefa atualizada com sucesso',
-    task: mockTasks,
+    task: mockedTasks(
+      1,
+      'tarefa 1',
+      true,
+      '2024-08-21',
+      'descrição de teste',
+      1,
+      null,
+      []
+    ),
   })
 })
 
