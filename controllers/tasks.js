@@ -1,5 +1,6 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
+import { findTaskError, findUserError, isNumber } from '../utils.js'
 
 const prisma = new PrismaClient()
 const router = express.Router()
@@ -8,12 +9,8 @@ export async function getTaskList(req, res) {
   try {
     const { userId, date } = req.query
 
-    const findUser = await prisma.usuario.findUnique({
-      where: { id: Number(userId) },
-    })
-    if (!findUser) {
-      return res.status(404).json({ message: 'Usuário não encontrado' })
-    }
+    isNumber(userId)
+    await findUserError(userId)
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -32,6 +29,8 @@ export async function getTaskList(req, res) {
 
 export async function getTask(req, res) {
   try {
+    isNumber(req.params.id)
+
     const task = await prisma.task.findUnique({
       where: { id: Number(req.params.id) },
       include: { tags: true },
@@ -49,10 +48,9 @@ export async function getTask(req, res) {
 export async function addTask(req, res) {
   try {
     const { title, date, userId } = req.body
-    const findUser = await prisma.usuario.findUnique({ where: { id: userId } })
-    if (!findUser) {
-      return res.status(404).json({ message: 'usuario não encontrada' })
-    }
+
+    isNumber(userId)
+    await findUserError(userId)
 
     const task = await prisma.task.create({
       data: {
@@ -72,17 +70,11 @@ export async function addTask(req, res) {
 export async function deleteTask(req, res) {
   try {
     const { userId, id } = req.query
-    const findUser = await prisma.usuario.findUnique({
-      where: { id: Number(userId) },
-    })
-    if (!findUser) {
-      return res.status(404).json({ message: 'usuario não encontrada' })
-    }
 
-    const findtask = await prisma.task.findUnique({ where: { id: Number(id) } })
-    if (!findtask) {
-      return res.status(404).json({ message: 'tarefa não encontrada' })
-    }
+    isNumber(userId)
+    isNumber(id)
+    await findUserError(userId)
+    await findTaskError(id)
 
     const deleteTask = await prisma.task.delete({
       where: {
@@ -99,12 +91,12 @@ export async function deleteTask(req, res) {
 
 export async function updateTaskStatus(req, res) {
   try {
-    const { id, status, description, title } = req.body
+    const { id, status, description, title, userId } = req.body
 
-    const findtask = await prisma.task.findUnique({ where: { id: Number(id) } })
-    if (!findtask) {
-      return res.status(404).json({ message: 'tarefa não encontrada' })
-    }
+    isNumber(id)
+    isNumber(userId)
+    await findUserError(userId) //acho q isso é necessário
+    await findTaskError(id)
 
     const task = await prisma.task.update({
       where: {
