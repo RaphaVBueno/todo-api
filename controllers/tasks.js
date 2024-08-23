@@ -23,7 +23,7 @@ export async function getTaskList(req, res) {
     res.json({ tasks })
   } catch (error) {
     console.error('Erro na função getTaskList:', error)
-    res.status(500).json({ message: 'Erro interno do servidor' })
+    res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -41,7 +41,7 @@ export async function getTask(req, res) {
     res.json({ task })
   } catch (error) {
     console.error('Erro na função getTask:', error)
-    res.status(500).json({ message: 'Erro interno do servidor' })
+    res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -63,7 +63,7 @@ export async function addTask(req, res) {
     res.json({ message: 'Tarefa adicionada com sucesso', task })
   } catch (error) {
     console.error('Erro na função addTask:', error)
-    res.status(500).json({ message: 'Erro interno do servidor' })
+    res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -85,7 +85,7 @@ export async function deleteTask(req, res) {
     return res.json({ message: 'Tarefa deletada com sucesso' })
   } catch (error) {
     console.error('Erro na função deleteTask:', error)
-    res.status(500).json({ message: 'Erro interno do servidor' })
+    res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -111,7 +111,7 @@ export async function updateTaskStatus(req, res) {
     res.json({ message: 'Tarefa atualizada com sucesso', task })
   } catch (error) {
     console.error('Erro na função updateTaskStatus:', error)
-    res.status(500).json({ message: 'Erro interno do servidor' })
+    res.status(500).json({ message: `${error}` })
   }
 }
 
