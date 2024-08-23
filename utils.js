@@ -35,7 +35,7 @@ export async function findUserError(userId) {
     where: { id: Number(userId) },
   })
   if (!findUser) {
-    throw new Error('usuário não encontrado')
+    throw new Error('usuário não encontrado', { cause: 404 })
   }
   return findUser
 }

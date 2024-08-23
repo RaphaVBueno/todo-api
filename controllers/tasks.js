@@ -23,7 +23,7 @@ export async function getTaskList(req, res) {
     res.json({ tasks })
   } catch (error) {
     console.error('Erro na função getTaskList:', error)
-    res.status(500).json({ message: `${error}` })
+    res.status(error.cause).json({ message: `${error.message}` })
   }
 }
 
