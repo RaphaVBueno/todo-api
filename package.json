@@ -7,7 +7,7 @@
     "test": "vitest",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.js",
-    "build": "tsc"
+    "build": "tsc -p tsconfig.prod.json"
   },
   "author": "",
   "license": "ISC",

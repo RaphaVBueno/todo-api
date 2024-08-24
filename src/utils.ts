@@ -1,16 +1,16 @@
 import { PrismaClient } from '@prisma/client'
-
+//TODO CRIAR ARQUIVOS COM MOCKS, mudar tsconfig.prod.json para não buildar os testes em ts
 const prisma = new PrismaClient()
 
 export function mockedTasks(
-  id,
-  title,
-  status,
-  date,
-  description,
-  userId,
-  listId,
-  tags
+  id: number,
+  title: string,
+  status: boolean,
+  date: string,
+  description: string,
+  userId: number,
+  listId: number,
+  tags: number[]
 ) {
   return {
     id: id,
@@ -24,13 +24,13 @@ export function mockedTasks(
   }
 }
 
-export function mockedList(id, name, userid) {
+export function mockedList(id: number, name: string, userid: number) {
   return { id: id, name: name, userid: userid }
 }
 
 export function mockedTag() {}
 
-export async function findUserError(userId) {
+export async function findUserError(userId: string) {
   const findUser = await prisma.usuario.findUnique({
     where: { id: Number(userId) },
   })
@@ -40,7 +40,7 @@ export async function findUserError(userId) {
   return findUser
 }
 
-export async function findTaskError(taskId) {
+export async function findTaskError(taskId: string) {
   const findTask = await prisma.task.findUnique({
     where: { id: Number(taskId) },
   })
@@ -50,7 +50,7 @@ export async function findTaskError(taskId) {
   return findTask
 }
 
-export async function findTagError(tagId) {
+export async function findTagError(tagId: string) {
   const findTag = await prisma.tag.findUnique({
     where: { id: Number(tagId) },
   })
@@ -60,7 +60,7 @@ export async function findTagError(tagId) {
   return findTag
 }
 
-export async function findListError(listId) {
+export async function findListError(listId: string) {
   const findList = await prisma.list.findUnique({
     where: { id: Number(listId) },
   })
@@ -70,11 +70,10 @@ export async function findListError(listId) {
   return findList
 }
 
-export function isNumber(id) {
+export function isNumber(id: number | string) {
   const parseId = Number(id)
   if (isNaN(parseId)) {
     throw new Error('id não é um número')
   }
-  return
 }
 // criar testes para tratamento de erros
