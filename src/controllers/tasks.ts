@@ -48,11 +48,7 @@ export async function getTask(req: Request, res: Response) {
 
 export async function addTask(req: Request, res: Response) {
   try {
-    const { title, date, userId } = req.body as {
-      title: string
-      userId: number
-      date: string
-    }
+    const { title, date, userId } = req.body
 
     isNumber(userId)
     await findUserError(userId)
@@ -62,7 +58,7 @@ export async function addTask(req: Request, res: Response) {
         title,
         status: false,
         date: new Date(date),
-        userId,
+        userId: Number(userId),
       },
     })
     res.json({ message: 'Tarefa adicionada com sucesso', task })
@@ -96,13 +92,7 @@ export async function deleteTask(req: Request, res: Response) {
 
 export async function updateTaskStatus(req: Request, res: Response) {
   try {
-    const { id, status, description, title, userId } = req.body as {
-      id: number
-      status: boolean
-      description: string
-      title: string
-      userId: number
-    }
+    const { id, status, description, title, userId } = req.body
 
     isNumber(id)
     isNumber(userId)

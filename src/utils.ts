@@ -49,7 +49,7 @@ export async function findTaskError(taskId: number | string) {
     where: { id: Number(taskId) },
   })
   if (!findTask) {
-    throw new Error('tarefa não encontrada')
+    throw new Error('tarefa não encontrada', { cause: 404 })
   }
   return findTask
 }
@@ -59,7 +59,7 @@ export async function findTagError(tagId: number | string) {
     where: { id: Number(tagId) },
   })
   if (!findTag) {
-    throw new Error('tag não encontrada')
+    throw new Error('tag não encontrada', { cause: 404 })
   }
   return findTag
 }
@@ -69,7 +69,7 @@ export async function findListError(listId: number | string) {
     where: { id: Number(listId) },
   })
   if (!findList) {
-    throw new Error('categoria não encontrada')
+    throw new Error('categoria não encontrada', { cause: 404 })
   }
   return findList
 }
@@ -77,7 +77,7 @@ export async function findListError(listId: number | string) {
 export function isNumber(id: number | string) {
   const parseId = Number(id)
   if (isNaN(parseId)) {
-    throw new Error('id não é um número')
+    throw new Error('id não é um número', { cause: 404 })
   }
 }
 // criar testes para tratamento de erros
