@@ -2,35 +2,39 @@ import { PrismaClient } from '@prisma/client'
 //TODO CRIAR ARQUIVOS COM MOCKS, mudar tsconfig.prod.json para não buildar os testes em ts
 const prisma = new PrismaClient()
 
-export function mockedTasks(
-  id: number,
-  title: string,
-  status: boolean,
-  date: string,
-  description: string,
-  userId: number,
-  listId: number,
-  tags: number[]
-) {
+type MockTask = {
+  id?: number
+  title?: string
+  status?: boolean
+  date?: string
+  description?: string
+  userId?: number
+  listId?: number
+  tags?: number[]
+}
+
+export function mockedTasks(params: MockTask) {
   return {
-    id: id,
-    title: title,
-    status: status,
-    date: date,
-    description: description,
-    userId: userId,
-    listId: listId,
-    tags: tags,
+    id: 1,
+    title: 'tarefa 1',
+    status: false,
+    date: '2024-08-21',
+    description: null,
+    userId: 1,
+    listId: null,
+    tags: [],
+    ...params,
   }
 }
 
 export function mockedList(id: number, name: string, userid: number) {
+  //mudar seguir exemplo do will
   return { id: id, name: name, userid: userid }
 }
 
 export function mockedTag() {}
 
-export async function findUserError(userId: string) {
+export async function findUserError(userId: number | string) {
   const findUser = await prisma.usuario.findUnique({
     where: { id: Number(userId) },
   })
@@ -40,7 +44,7 @@ export async function findUserError(userId: string) {
   return findUser
 }
 
-export async function findTaskError(taskId: string) {
+export async function findTaskError(taskId: number | string) {
   const findTask = await prisma.task.findUnique({
     where: { id: Number(taskId) },
   })
@@ -50,7 +54,7 @@ export async function findTaskError(taskId: string) {
   return findTask
 }
 
-export async function findTagError(tagId: string) {
+export async function findTagError(tagId: number | string) {
   const findTag = await prisma.tag.findUnique({
     where: { id: Number(tagId) },
   })
@@ -60,7 +64,7 @@ export async function findTagError(tagId: string) {
   return findTag
 }
 
-export async function findListError(listId: string) {
+export async function findListError(listId: number | string) {
   const findList = await prisma.list.findUnique({
     where: { id: Number(listId) },
   })

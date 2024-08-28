@@ -1,13 +1,13 @@
-import express from 'express'
+import express, { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { findTaskError, findUserError, isNumber } from '../utils.js'
 
 const prisma = new PrismaClient()
 const router = express.Router()
 
-export async function getTaskList(req, res) {
+export async function getTaskList(req: Request, res: Response) {
   try {
-    const { userId, date } = req.query
+    const { userId, date } = req.query as { userId: string; date: string }
 
     isNumber(userId)
     await findUserError(userId)
@@ -21,18 +21,19 @@ export async function getTaskList(req, res) {
     })
 
     res.json({ tasks })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro na função getTaskList:', error)
     res.status(error.cause).json({ message: `${error.message}` })
   }
 }
 
-export async function getTask(req, res) {
+export async function getTask(req: Request, res: Response) {
   try {
-    isNumber(req.params.id)
+    const { id } = req.params as { id: string }
+    isNumber(id)
 
     const task = await prisma.task.findUnique({
-      where: { id: Number(req.params.id) },
+      where: { id: Number(id) },
       include: { tags: true },
     })
     if (!task) {
@@ -45,9 +46,13 @@ export async function getTask(req, res) {
   }
 }
 
-export async function addTask(req, res) {
+export async function addTask(req: Request, res: Response) {
   try {
-    const { title, date, userId } = req.body
+    const { title, date, userId } = req.body as {
+      title: string
+      userId: number
+      date: string
+    }
 
     isNumber(userId)
     await findUserError(userId)
@@ -67,9 +72,9 @@ export async function addTask(req, res) {
   }
 }
 
-export async function deleteTask(req, res) {
+export async function deleteTask(req: Request, res: Response) {
   try {
-    const { userId, id } = req.query
+    const { userId, id } = req.query as { userId: string; id: string }
 
     isNumber(userId)
     isNumber(id)
@@ -82,16 +87,22 @@ export async function deleteTask(req, res) {
       },
     })
 
-    return res.json({ message: 'Tarefa deletada com sucesso' })
+    return res.json({ message: 'tarefa deletada com sucesso', deleteTask })
   } catch (error) {
-    console.error('Erro na função deleteTask:', error)
+    console.error('erro na função deleteTask:', error)
     res.status(500).json({ message: `${error}` })
   }
 }
 
-export async function updateTaskStatus(req, res) {
+export async function updateTaskStatus(req: Request, res: Response) {
   try {
-    const { id, status, description, title, userId } = req.body
+    const { id, status, description, title, userId } = req.body as {
+      id: number
+      status: boolean
+      description: string
+      title: string
+      userId: number
+    }
 
     isNumber(id)
     isNumber(userId)

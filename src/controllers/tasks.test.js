@@ -31,10 +31,7 @@ describe('Testando as funções da API de Tarefas', () => {
   })
 
   it('getTaskList - deve retornar a lista de tarefas', async () => {
-    const mockTasks = [
-      mockedTasks(1, 'tarefa 1', false, '2024-08-21', null, 1, null, []),
-      mockedTasks(2, 'tarefa 2', false, '2024-08-21', null, 1, null, []),
-    ]
+    const mockTasks = [mockedTasks(1), mockedTasks({ id: 2 })]
 
     // Mock da função prisma.task.findMany
     prisma.task.findMany.mockResolvedValue(mockTasks)
