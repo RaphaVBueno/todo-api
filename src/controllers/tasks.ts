@@ -22,7 +22,7 @@ export async function getTaskList(req: Request, res: Response) {
 
     res.json({ tasks })
   } catch (error: any) {
-    console.error('Erro na função getTaskList:', error)
+    console.error(error)
     res.status(error.cause).json({ message: `${error.message}` })
   }
 }

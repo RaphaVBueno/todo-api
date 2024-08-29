@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { findUserError, isNumber } from 'src/utils.js'
 
 const prisma = new PrismaClient()
 
@@ -12,60 +13,86 @@ export async function getUserList(req: Request, res: Response) {
     res.status(500).json({ message: `erro na consulta de usuários` })
   }
 }
-//parei aqui
+
 export async function getUser(req: Request, res: Response) {
-  const { id } = req.params as { id: string }
-  const user = await prisma.usuario.findUnique({
-    where: { id: Number(id) },
-  })
-  res.json({ user })
+  try {
+    const { id } = req.params as { id: string }
+    isNumber(id)
+    await findUserError(id)
+
+    const user = await prisma.usuario.findUnique({
+      where: { id: Number(id) },
+    })
+    res.json({ user })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
+  }
 }
 
 export async function addUser(req: Request, res: Response) {
-  const { name, email, password } = req.body
-  const user = await prisma.usuario.create({
-    data: {
-      email,
-      password,
-      name,
-    },
-  })
-  res.json({ message: 'Usuario adicionado com sucesso', user })
+  try {
+    const { name, email, password } = req.body
+    const existingUser = await prisma.usuario.findUnique({
+      where: { email },
+    })
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'e-mail já está em uso.' })
+    }
+
+    const user = await prisma.usuario.create({
+      data: {
+        email,
+        password,
+        name,
+      },
+    })
+    res.json({ message: 'usuario adicionado com sucesso', user })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
+  }
 }
 
 export async function deleteUser(req: Request, res: Response) {
-  const { id } = req.body
-  console.log(req.body)
-  const user = await prisma.usuario.delete({
-    where: {
-      id,
-    },
-  })
-  res.json({ message: 'Usuario deletado com sucesso', user })
-}
+  try {
+    const { id } = req.body
+    isNumber(id)
+    await findUserError(id)
 
-export async function getUserLists(req: Request, res: Response) {
-  const id = parseInt(req.params.id, 10)
-  const user = await prisma.usuario.findUnique({
-    where: { id },
-    include: { lists: true },
-  })
-  res.json({ userLists: user.lists })
+    const user = await prisma.usuario.delete({
+      where: {
+        id,
+      },
+    })
+    res.json({ message: 'usuario deletado com sucesso', user })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
+  }
 }
 
 export async function updateUser(req: Request, res: Response) {
-  const { name, password, id, email } = req.body
+  try {
+    const { name, password, id, email } = req.body
+    isNumber(id)
+    await findUserError(id)
 
-  const user = await prisma.usuario.update({
-    where: { id },
-    data: {
-      name,
-      password,
-      email,
-    },
-  })
+    const user = await prisma.usuario.update({
+      where: { id },
+      data: {
+        name,
+        password,
+        email,
+      },
+    })
 
-  res.json({ message: 'Usuario atualizado com sucesso', user })
+    res.json({ message: 'usuario atualizado com sucesso', user })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
+  }
 }
 
 const router = express.Router()
@@ -79,7 +106,5 @@ router.post('/add', addUser)
 router.delete('/', deleteUser)
 
 router.put('/', updateUser)
-
-router.get('/:id/lists', getUserLists)
 
 export default router
