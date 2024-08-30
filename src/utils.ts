@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-//TODO CRIAR ARQUIVOS COM MOCKS, mudar tsconfig.prod.json para não buildar os testes em ts
+
 const prisma = new PrismaClient()
 
 type MockTask = {

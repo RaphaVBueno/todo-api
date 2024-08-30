@@ -85,10 +85,8 @@ async function updateTag(req: Request, res: Response) {
 
 async function deleteTag(req: Request, res: Response) {
   try {
-    const { id, userId } = req.query as { id: string; userId: string }
+    const { id } = req.params as { id: string }
     isNumber(id)
-    isNumber(userId)
-    await findUserError(userId)
     await findTagError(id)
 
     const tag = await prisma.tag.delete({
