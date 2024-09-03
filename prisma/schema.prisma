@@ -46,6 +46,7 @@ model List {
   userId      Int
   user        Usuario @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks       Task[]
+  color       String? @default("#7E7E7E")
 
   @@map("lists")
 }
