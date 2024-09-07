@@ -7,14 +7,17 @@ const router = express.Router()
 
 export async function getTaskList(req: Request, res: Response) {
   try {
-    const { userId, date } = req.query as { userId: string; date: string }
+    const { userId, dueDate } = req.query as { userId: string; dueDate: string }
 
     isNumber(userId)
     await findUserError(userId)
 
     const tasks = await prisma.task.findMany({
       where: {
-        date: new Date(date),
+        OR: [
+          { dueDate: { lte: new Date(dueDate) }, status: false },
+          { completedDate: new Date(dueDate), status: true },
+        ],
         userId: Number(userId),
       },
       include: { tags: true },
@@ -48,7 +51,7 @@ export async function getTask(req: Request, res: Response) {
 
 export async function addTask(req: Request, res: Response) {
   try {
-    const { title, date, userId } = req.body
+    const { title, dueDate, userId } = req.body
 
     isNumber(userId)
     await findUserError(userId)
@@ -57,7 +60,7 @@ export async function addTask(req: Request, res: Response) {
       data: {
         title,
         status: false,
-        date: new Date(date),
+        dueDate: dueDate && new Date(dueDate),
         userId: Number(userId),
       },
     })
@@ -92,7 +95,8 @@ export async function deleteTask(req: Request, res: Response) {
 
 export async function updateTaskStatus(req: Request, res: Response) {
   try {
-    const { id, status, description, title, userId } = req.body
+    const { id, status, description, title, userId, dueDate, completedDate } =
+      req.body
 
     isNumber(id)
     isNumber(userId)
@@ -107,6 +111,13 @@ export async function updateTaskStatus(req: Request, res: Response) {
         status,
         description,
         title,
+        completedDate:
+          status && !completedDate
+            ? new Date()
+            : completedDate
+            ? new Date(completedDate)
+            : null,
+        dueDate: dueDate && new Date(dueDate),
       },
     })
     res.json({ message: 'Tarefa atualizada com sucesso', task })
