@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { parseISO, isValid, parse } from 'date-fns'
 
 const prisma = new PrismaClient()
 
@@ -12,6 +13,8 @@ type MockTask = {
   listId?: number
   tags?: number[]
 }
+
+export const timeZone = 'America/Sao_Paulo'
 
 export function mockedTasks(params: MockTask) {
   return {
@@ -80,4 +83,13 @@ export function isNumber(id: number | string) {
     throw new Error('id não é um número', { cause: 404 })
   }
 }
+
+export function isValidDate(dateString: string) {
+  const date = parse(dateString, 'yyyy-MM-dd', new Date())
+
+  if (!isValid(date)) {
+    throw new Error('não é uma data válida', { cause: 404 })
+  }
+}
+
 // criar testes para tratamento de erros

@@ -1,6 +1,13 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { findTaskError, findUserError, isNumber } from '../utils.js'
+import {
+  findTaskError,
+  findUserError,
+  isNumber,
+  isValidDate,
+  timeZone,
+} from '../utils.js'
+import { toZonedTime, format } from 'date-fns-tz'
 
 const prisma = new PrismaClient()
 const router = express.Router()
@@ -11,6 +18,7 @@ export async function getTaskList(req: Request, res: Response) {
 
     isNumber(userId)
     await findUserError(userId)
+    //isValidDate(dueDate)
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -55,12 +63,13 @@ export async function addTask(req: Request, res: Response) {
 
     isNumber(userId)
     await findUserError(userId)
+    isValidDate(dueDate)
 
     const task = await prisma.task.create({
       data: {
         title,
         status: false,
-        dueDate: dueDate && new Date(dueDate),
+        dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
         userId: Number(userId),
       },
     })
