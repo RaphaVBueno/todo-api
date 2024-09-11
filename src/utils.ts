@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { parseISO, isValid, parse } from 'date-fns'
+import { isValid, parse } from 'date-fns'
 
 const prisma = new PrismaClient()
 
