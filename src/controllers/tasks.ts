@@ -111,7 +111,7 @@ export async function updateTaskStatus(req: Request, res: Response) {
     isNumber(userId)
     await findUserError(userId) //acho q isso é necessário
     await findTaskError(id)
-    isValidDate(dueDate)
+    //isValidDate(dueDate)
 
     const task = await prisma.task.update({
       where: {
