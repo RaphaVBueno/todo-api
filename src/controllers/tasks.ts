@@ -6,7 +6,7 @@ import {
   isNumber,
   isValidDate,
   timeZone,
-} from '../utils.js'
+} from '../utils'
 import { toZonedTime } from 'date-fns-tz'
 
 const prisma = new PrismaClient()

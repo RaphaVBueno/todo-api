@@ -1,11 +1,6 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import {
-  findListError,
-  findTaskError,
-  findUserError,
-  isNumber,
-} from '../utils.js'
+import { findListError, findTaskError, findUserError, isNumber } from '../utils'
 
 const prisma = new PrismaClient()
 

@@ -1,8 +1,8 @@
 import express from 'express'
-import tasks from './controllers/tasks.js'
-import users from './controllers/users.js'
-import list from './controllers/list.js'
-import tag from './controllers/tag.js'
+import tasks from './controllers/tasks'
+import users from './controllers/users'
+import list from './controllers/list'
+import tag from './controllers/tag'
 import cors from 'cors'
 
 const app = express()
@@ -16,6 +16,8 @@ app.use('/tasks', tasks)
 app.use('/user', users)
 app.use('/list', list)
 app.use('/tag', tag)
+
+export default app
 
 const port = 3000
 
