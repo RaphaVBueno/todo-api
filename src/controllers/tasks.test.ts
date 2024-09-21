@@ -1,179 +1,46 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import {
-  getTaskList,
-  getTask,
-  addTask,
-  deleteTask,
-  updateTaskStatus,
-} from './tasks.js'
-import { findTaskError, findUserError, isNumber } from '../utils.js'
-import { PrismaClient } from '@prisma/client'
+import { describe, it, expect } from 'vitest'
+import request from 'supertest'
+import app from '../server'
 
-// Tipando o PrismaClient para garantir que o TypeScript entenda o mock
-const prisma = new PrismaClient()
-
-// Criando o mock do Prisma Client
-vi.mock('@prisma/client', () => {
-  return {
-    PrismaClient: vi.fn().mockImplementation(() => ({
-      task: {
-        findMany: vi.fn(),
-        findUnique: vi.fn(),
-        create: vi.fn(),
-        delete: vi.fn(),
-        update: vi.fn(),
-      },
-    })),
-  }
-})
-
-vi.mock('../utils.js', () => ({
-  findTaskError: vi.fn(),
-  findUserError: vi.fn(),
-  isNumber: vi.fn(),
-}))
-
-const mockRequest = (query = {}, params = {}, body = {}) => ({
-  query,
-  params,
-  body,
-})
-
-const mockResponse = () => {
-  const res: any = {}
-  res.json = vi.fn().mockReturnValue(res)
-  res.status = vi.fn().mockReturnValue(res)
-  return res
-}
-
-beforeEach(() => {
-  vi.doMock
-})
-
-afterEach(() => {
-  vi.clearAllMocks()
-})
-
-describe('Testes unitários das funções', () => {
-  it.only('deve retornar a lista de tarefas', async () => {
-    const req = mockRequest({ userId: '1', date: '2023-08-30' })
-    const res = mockResponse()
-
-    // prisma.task.findMany.mockResolvedValue([{ id: 1, title: 'Task 1' }])
-
-    await getTaskList(req as any, res)
-
-    expect(isNumber).toHaveBeenCalledWith('1')
-    expect(findUserError).toHaveBeenCalledWith('1')
-    // expect(prisma.task.findMany).toHaveBeenCalled()
-    // expect(prisma.task.findMany).toHaveBeenCalledWith({
-    //   where: {
-    //     date: new Date('2023-08-30'),
-    //     userId: 1,
-    //   },
-    //   include: { tags: true },
-    // })
-    // expect(res.json).toHaveBeenCalledWith({
-    //   tasks: [{ id: 1, title: 'Task 1' }],
-    // })
-  })
-
-  it('deve retornar um erro ao buscar uma tarefa inexistente', async () => {
-    const req = mockRequest({}, { id: '2' })
-    const res = mockResponse()
-
-    mockPrisma.task.findUnique.mockResolvedValue(null)
-
-    await getTask(req as any, res)
-
-    expect(isNumber).toHaveBeenCalledWith('2')
-    expect(mockPrisma.task.findUnique).toHaveBeenCalledWith({
-      where: { id: 2 },
-      include: { tags: true },
-    })
-    expect(res.status).toHaveBeenCalledWith(404)
-    expect(res.json).toHaveBeenCalledWith({ message: 'tarefa não encontrada' })
-  })
-
-  it('deve adicionar uma nova tarefa', async () => {
-    const req = mockRequest(
-      {},
-      {},
-      { title: 'Nova Tarefa', date: '2023-08-30', userId: '1' }
+describe('/tasks', () => {
+  it('GET / - deve retornar a lista de tarefas', async () => {
+    const response = await request(app).get(
+      '/tasks?userId=1&dueDate=2024-09-06'
     )
-    const res = mockResponse()
 
-    mockPrisma.task.create.mockResolvedValue({ id: 1, title: 'Nova Tarefa' })
-
-    await addTask(req as any, res)
-
-    expect(isNumber).toHaveBeenCalledWith('1')
-    expect(findUserError).toHaveBeenCalledWith('1')
-    expect(mockPrisma.task.create).toHaveBeenCalledWith({
-      data: {
-        title: 'Nova Tarefa',
-        status: false,
-        date: new Date('2023-08-30'),
-        userId: 1,
-      },
-    })
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'Tarefa adicionada com sucesso',
-      task: { id: 1, title: 'Nova Tarefa' },
-    })
+    expect(response.status).toBe(200)
+    expect(response.body).toHaveProperty('tasks')
   })
 
-  it('deve deletar uma tarefa', async () => {
-    const req = mockRequest({ userId: '1', id: '1' })
-    const res = mockResponse()
+  it('POST /add - deve adicionar uma nova tarefa', async () => {
+    const response = await request(app)
+      .post('/tasks/add')
+      .send({ title: 'tarefa teste', dueDate: '2024-09-20', userId: 1 })
 
-    mockPrisma.task.delete.mockResolvedValue({
-      id: 1,
-      title: 'Tarefa Deletada',
-    })
-
-    await deleteTask(req as any, res)
-
-    expect(isNumber).toHaveBeenCalledWith('1')
-    expect(findUserError).toHaveBeenCalledWith('1')
-    expect(findTaskError).toHaveBeenCalledWith('1')
-    expect(mockPrisma.task.delete).toHaveBeenCalledWith({
-      where: {
-        id: 1,
-      },
-    })
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'tarefa deletada com sucesso',
-      deleteTask: { id: 1, title: 'Tarefa Deletada' },
-    })
+    expect(response.status).toBe(200)
+    expect(response.body).toHaveProperty('message')
+    expect(response.body.message).toBe('Tarefa adicionada com sucesso')
   })
 
-  it('deve atualizar o status de uma tarefa', async () => {
-    const req = mockRequest(
-      {},
-      {},
-      { id: '1', status: true, title: 'Tarefa Atualizada', userId: '1' }
-    )
-    const res = mockResponse()
+  it('GET /tasks/:id - deve retornar uma tarefa por id', async () => {
+    const taskId = 1
+    const response = await request(app).get(`/tasks/${taskId}`)
+    const { task } = response.body
 
-    mockPrisma.task.update.mockResolvedValue({
-      id: 1,
-      title: 'Tarefa Atualizada',
-      status: true,
-    })
-
-    await updateTaskStatus(req as any, res)
-
-    expect(isNumber).toHaveBeenCalledWith('1')
-    expect(findUserError).toHaveBeenCalledWith('1')
-    expect(findTaskError).toHaveBeenCalledWith('1')
-    expect(mockPrisma.task.update).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: { status: true, title: 'Tarefa Atualizada' },
-    })
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'Tarefa atualizada com sucesso',
-      task: { id: 1, title: 'Tarefa Atualizada', status: true },
-    })
+    expect(response.status).toBe(200)
+    expect(task.id).toBe(taskId)
+    expect(task.title).toBe('estudar')
   })
+
+  it('GET /tasks/:id - deve retornar um erro ao buscar uma tarefa inexistente', async () => {
+    const wrongId = 'abadfasdfas'
+    const response = await request(app).get(`/tasks/${wrongId}`)
+
+    expect(response.status).toBe(500)
+    expect(response.body.message).toBe('Error: id não é um número')
+  })
+
+  // it('deve deletar uma tarefa', async () => {})
+
+  // it('deve atualizar o status de uma tarefa', async () => {})
 })
