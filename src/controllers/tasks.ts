@@ -59,7 +59,7 @@ export async function getTask(req: Request, res: Response) {
 
 export async function addTask(req: Request, res: Response) {
   try {
-    const { title, dueDate, userId } = req.body
+    const { title, dueDate, userId, ...rest } = req.body
 
     isNumber(userId)
     await findUserError(userId)
@@ -71,6 +71,7 @@ export async function addTask(req: Request, res: Response) {
         status: false,
         dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
         userId: Number(userId),
+        ...rest,
       },
     })
     res.json({ message: 'Tarefa adicionada com sucesso', task })
@@ -104,14 +105,21 @@ export async function deleteTask(req: Request, res: Response) {
 
 export async function updateTaskStatus(req: Request, res: Response) {
   try {
-    const { id, status, description, title, userId, dueDate, completedDate } =
-      req.body
+    const {
+      id,
+      status,
+      description,
+      title,
+      userId,
+      dueDate,
+      completedDate,
+      listId,
+      tagId,
+    } = req.body
 
     isNumber(id)
     isNumber(userId)
-    await findUserError(userId) //acho q isso é necessário
-    await findTaskError(id)
-    //isValidDate(dueDate)
+    await findUserError(userId)
 
     const task = await prisma.task.update({
       where: {
@@ -127,9 +135,12 @@ export async function updateTaskStatus(req: Request, res: Response) {
             : completedDate
             ? new Date(completedDate)
             : null,
-        dueDate: dueDate && new Date(dueDate),
+        dueDate: dueDate ? toZonedTime(new Date(dueDate), timeZone) : undefined,
+        listId: listId ? Number(listId) : null,
+        tags: tagId ? { connect: { id: Number(tagId) } } : undefined,
       },
     })
+
     res.json({ message: 'Tarefa atualizada com sucesso', task })
   } catch (error) {
     console.error('Erro na função updateTaskStatus:', error)
