@@ -59,7 +59,7 @@ export async function getTask(req: Request, res: Response) {
 
 export async function addTask(req: Request, res: Response) {
   try {
-    const { title, dueDate, userId, ...rest } = req.body
+    const { title, dueDate, userId, listId, tagId } = req.body
 
     isNumber(userId)
     await findUserError(userId)
@@ -71,7 +71,7 @@ export async function addTask(req: Request, res: Response) {
         status: false,
         dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
         userId: Number(userId),
-        ...rest,
+        listId,
       },
     })
     res.json({ message: 'Tarefa adicionada com sucesso', task })
@@ -103,7 +103,7 @@ export async function deleteTask(req: Request, res: Response) {
   }
 }
 
-export async function updateTaskStatus(req: Request, res: Response) {
+export async function updateTask(req: Request, res: Response) {
   try {
     const {
       id,
@@ -148,6 +148,35 @@ export async function updateTaskStatus(req: Request, res: Response) {
   }
 }
 
+export async function updateTaskStatus(req: Request, res: Response) {
+  try {
+    const { id, status, completedDate, userId } = req.body
+
+    isNumber(id)
+    isNumber(userId)
+    await findUserError(userId)
+
+    const task = await prisma.task.update({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        status,
+        completedDate:
+          status && !completedDate
+            ? new Date()
+            : completedDate
+            ? new Date(completedDate)
+            : null,
+      },
+    })
+    res.json({ message: 'Tarefa atualizada com sucesso', task })
+  } catch (error) {
+    console.error('Erro na função updateTaskStatus:', error)
+    res.status(500).json({ message: `${error}` })
+  }
+}
+
 router.get('/', getTaskList)
 
 router.get('/:id', getTask)
@@ -156,6 +185,8 @@ router.post('/add', addTask)
 
 router.delete('/:id', deleteTask)
 
-router.post('/:id/update', updateTaskStatus)
+router.post('/:id/update', updateTask)
+
+router.post('/:id/status', updateTaskStatus)
 
 export default router
