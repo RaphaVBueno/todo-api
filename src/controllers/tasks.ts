@@ -57,13 +57,34 @@ export async function getTask(req: Request, res: Response) {
   }
 }
 
+export async function searchTask(req: Request, res: Response) {
+  try {
+    const { search } = req.params as { search: string }
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        title: {
+          contains: search, // Busca parte do título
+          mode: 'insensitive', // Ignora a diferença entre maiúsculas e minúsculas
+        },
+      },
+    })
+
+    return res.json(tasks)
+  } catch (error) {
+    console.error('erro ao buscar tarefa:', error)
+    throw new Error('não foi possível encontrar a tarefa.')
+  }
+}
+
 export async function addTask(req: Request, res: Response) {
   try {
-    const { title, dueDate, userId, listId, tagId } = req.body
+    const { title, dueDate, userId, listId, tagId, description } = req.body
 
     isNumber(userId)
     await findUserError(userId)
     isValidDate(dueDate)
+    console.log(toZonedTime(new Date(dueDate), timeZone))
 
     const task = await prisma.task.create({
       data: {
@@ -71,6 +92,7 @@ export async function addTask(req: Request, res: Response) {
         status: false,
         dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
         userId: Number(userId),
+        description,
         listId,
       },
     })
@@ -180,6 +202,8 @@ export async function updateTaskStatus(req: Request, res: Response) {
 router.get('/', getTaskList)
 
 router.get('/:id', getTask)
+
+router.get('/busca/:search', searchTask)
 
 router.post('/add', addTask)
 
