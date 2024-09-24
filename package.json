@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest",
     "start": "node dist/server.js",
-    "dev": "tsx watch src/server.js",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.prod.json"
   },
   "author": "",
