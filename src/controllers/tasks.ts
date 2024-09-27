@@ -70,10 +70,10 @@ export async function searchTask(req: Request, res: Response) {
       },
     })
 
-    return res.json(tasks)
+    return res.json({ tasks })
   } catch (error) {
     console.error('erro ao buscar tarefa:', error)
-    throw new Error('não foi possível encontrar a tarefa.')
+    res.status(500).json('não foi possível encontrar a tarefa.')
   }
 }
 
