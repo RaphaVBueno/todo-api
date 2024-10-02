@@ -84,7 +84,6 @@ export async function addTask(req: Request, res: Response) {
     isNumber(userId)
     await findUserError(userId)
     isValidDate(dueDate)
-    console.log(toZonedTime(new Date(dueDate), timeZone))
 
     const task = await prisma.task.create({
       data: {
@@ -97,9 +96,9 @@ export async function addTask(req: Request, res: Response) {
       },
     })
     res.json({ message: 'Tarefa adicionada com sucesso', task })
-  } catch (error) {
-    console.error('Erro na função addTask:', error)
-    res.status(500).json({ message: `${error}` })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
   }
 }
 
@@ -119,9 +118,9 @@ export async function deleteTask(req: Request, res: Response) {
     })
 
     return res.json({ message: 'tarefa deletada com sucesso', deleteTask })
-  } catch (error) {
-    console.error('erro na função deleteTask:', error)
-    res.status(500).json({ message: `${error}` })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
   }
 }
 
@@ -164,9 +163,9 @@ export async function updateTask(req: Request, res: Response) {
     })
 
     res.json({ message: 'Tarefa atualizada com sucesso', task })
-  } catch (error) {
-    console.error('Erro na função updateTaskStatus:', error)
-    res.status(500).json({ message: `${error}` })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
   }
 }
 
@@ -193,9 +192,9 @@ export async function updateTaskStatus(req: Request, res: Response) {
       },
     })
     res.json({ message: 'Tarefa atualizada com sucesso', task })
-  } catch (error) {
-    console.error('Erro na função updateTaskStatus:', error)
-    res.status(500).json({ message: `${error}` })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
   }
 }
 
