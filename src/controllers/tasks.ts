@@ -158,7 +158,12 @@ export async function updateTask(req: Request, res: Response) {
             : null,
         dueDate: dueDate ? toZonedTime(new Date(dueDate), timeZone) : undefined,
         listId: listId ? Number(listId) : null,
-        tags: tagId ? { connect: { id: Number(tagId) } } : undefined,
+        tags:
+          tagId === 9999999
+            ? { set: [] }
+            : tagId
+            ? { connect: { id: Number(tagId) } }
+            : undefined,
       },
     })
 
