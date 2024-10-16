@@ -93,6 +93,11 @@ export async function addTask(req: Request, res: Response) {
         userId: Number(userId),
         description,
         listId,
+        ...(tagId && {
+          tags: {
+            connect: { id: Number(tagId) },
+          },
+        }),
       },
     })
     res.json({ message: 'Tarefa adicionada com sucesso', task })
