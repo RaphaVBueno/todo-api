@@ -23,11 +23,11 @@ async function login(req: Request, res: Response) {
 
   if (!user) return res.json({ error: 'Usuário ou senha inválidos' })
 
-  const token = jwt.sing({ id: user.id }, process.env.SECRET as string)
+  const token = jwt.sign({ id: user.id }, process.env.SECRET as string)
 
   res.json({ token })
 }
 
-router.post('/loin', login)
+router.post('/login', login)
 
 export default router

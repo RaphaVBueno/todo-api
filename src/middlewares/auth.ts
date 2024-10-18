@@ -9,7 +9,7 @@ export default async function auth(
   res: Response,
   next: NextFunction
 ) {
-  const authHeader = req.header.authorization
+  const authHeader = req.headers.authorization
   const tokenMatch = authHeader?.match(/^Bearer\s+(\S+)$/)
   const token = tokenMatch ? tokenMatch[1] : ''
 
