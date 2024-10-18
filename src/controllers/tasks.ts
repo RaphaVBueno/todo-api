@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Usuario } from '@prisma/client'
 import {
   findTaskError,
   findUserError,
@@ -14,10 +14,9 @@ const router = express.Router()
 
 export async function getTaskList(req: Request, res: Response) {
   try {
-    const { userId, dueDate } = req.query as { userId: string; dueDate: string }
+    const { dueDate } = req.query as { userId: string; dueDate: string }
+    const { id } = req.body.context.user as Usuario
 
-    isNumber(userId)
-    await findUserError(userId)
     isValidDate(dueDate)
 
     const tasks = await prisma.task.findMany({
@@ -26,7 +25,7 @@ export async function getTaskList(req: Request, res: Response) {
           { dueDate: { lte: new Date(dueDate) }, status: false },
           { completedDate: new Date(dueDate), status: true },
         ],
-        userId: Number(userId),
+        userId: id,
       },
       include: { tags: true },
     })
