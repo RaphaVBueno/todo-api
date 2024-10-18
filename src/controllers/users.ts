@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { findUserError, isNumber } from 'src/utils'
+import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
@@ -42,12 +43,15 @@ export async function addUser(req: Request, res: Response) {
       return res.status(400).json({ message: 'e-mail já está em uso.' })
     }
 
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
     const user = await prisma.usuario.create({
       data: {
         email,
-        password,
+        password: hashedPassword,
         name,
-        birthDate: new Date('2024-10-18'),
+        birthDate: new Date(birthDate),
         username,
       },
     })
