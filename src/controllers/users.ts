@@ -33,7 +33,7 @@ export async function getUser(req: Request, res: Response) {
 
 export async function addUser(req: Request, res: Response) {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password, birthDate, username } = req.body
     const existingUser = await prisma.usuario.findUnique({
       where: { email },
     })
@@ -47,6 +47,8 @@ export async function addUser(req: Request, res: Response) {
         email,
         password,
         name,
+        birthDate: new Date('2024-10-18'),
+        username,
       },
     })
     res.json({ message: 'usuario adicionado com sucesso', user })
