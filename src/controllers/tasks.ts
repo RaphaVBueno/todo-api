@@ -1,12 +1,6 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import {
-  findTaskError,
-  findUserError,
-  isNumber,
-  isValidDate,
-  timeZone,
-} from '../utils'
+import { isNumber, isValidDate, timeZone } from '../utils'
 import { toZonedTime } from 'date-fns-tz'
 
 const prisma = new PrismaClient()
@@ -39,16 +33,22 @@ export async function getTaskList(req: Request, res: Response) {
 
 export async function getTask(req: Request, res: Response) {
   try {
-    const { id } = req.params as { id: string }
-    isNumber(id)
+    const { taskId } = req.params as { taskId: string }
+    isNumber(taskId)
+    const { id } = req.body.context.user as Usuario
 
     const task = await prisma.task.findUnique({
-      where: { id: Number(id) },
+      where: {
+        id: Number(taskId),
+        userId: id,
+      },
       include: { tags: true },
     })
+
     if (!task) {
       return res.status(404).json({ message: 'tarefa não encontrada' })
     }
+
     res.json({ task })
   } catch (error) {
     console.error('Erro na função getTask:', error)
@@ -59,29 +59,30 @@ export async function getTask(req: Request, res: Response) {
 export async function searchTask(req: Request, res: Response) {
   try {
     const { search } = req.params as { search: string }
+    const { id } = req.body.context.user as Usuario
 
     const tasks = await prisma.task.findMany({
       where: {
         title: {
-          contains: search, // Busca parte do título
-          mode: 'insensitive', // Ignora a diferença entre maiúsculas e minúsculas
+          contains: search,
+          mode: 'insensitive',
         },
+        userId: id,
       },
     })
 
     return res.json({ tasks })
   } catch (error) {
     console.error('erro ao buscar tarefa:', error)
-    res.status(500).json('não foi possível encontrar a tarefa.')
+    res.status(500).json({ message: 'não foi possível encontrar a tarefa.' })
   }
 }
 
 export async function addTask(req: Request, res: Response) {
   try {
-    const { title, dueDate, userId, listId, tagId, description } = req.body
+    const { title, dueDate, listId, tagId, description } = req.body
+    const { id } = req.body.context.user as Usuario
 
-    isNumber(userId)
-    await findUserError(userId)
     isValidDate(dueDate)
 
     const task = await prisma.task.create({
@@ -89,7 +90,7 @@ export async function addTask(req: Request, res: Response) {
         title,
         status: false,
         dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
-        userId: Number(userId),
+        userId: Number(id),
         description,
         listId,
         ...(tagId && {
@@ -99,7 +100,7 @@ export async function addTask(req: Request, res: Response) {
         }),
       },
     })
-    res.json({ message: 'Tarefa adicionada com sucesso', task })
+    res.json({ message: 'tarefa adicionada com sucesso', task })
   } catch (error: any) {
     console.error(error)
     res.status(error.cause).json({ message: `${error.message}` })
@@ -108,47 +109,48 @@ export async function addTask(req: Request, res: Response) {
 
 export async function deleteTask(req: Request, res: Response) {
   try {
-    const { userId, id } = req.query as { userId: string; id: string }
+    const { taskId } = req.params as { taskId: string }
+    const { id } = req.body.context.user as Usuario
 
-    isNumber(userId)
-    isNumber(id)
-    await findUserError(userId)
-    await findTaskError(id)
+    isNumber(taskId)
 
-    const deleteTask = await prisma.task.delete({
+    const deletedTask = await prisma.task.delete({
       where: {
-        id: Number(id),
+        id: Number(taskId),
+        userId: id,
       },
     })
 
-    return res.json({ message: 'tarefa deletada com sucesso', deleteTask })
+    return res.json({ message: 'Tarefa deletada com sucesso', deletedTask })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      // Verifica se o erro é de não encontrar a tarefa
+      return res.status(404).json({ message: 'tarefa não encontrada' })
+    }
     console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
+    res.status(error.cause || 500).json({ message: `${error.message}` })
   }
 }
 
 export async function updateTask(req: Request, res: Response) {
   try {
     const {
-      id,
+      taskId,
       status,
       description,
       title,
-      userId,
       dueDate,
       completedDate,
       listId,
       tagId,
     } = req.body
 
-    isNumber(id)
-    isNumber(userId)
-    await findUserError(userId)
+    const { id } = req.body.context.user as Usuario
 
     const task = await prisma.task.update({
       where: {
-        id: Number(id),
+        id: Number(taskId),
+        userId: Number(id),
       },
       data: {
         status,
@@ -171,24 +173,28 @@ export async function updateTask(req: Request, res: Response) {
       },
     })
 
-    res.json({ message: 'Tarefa atualizada com sucesso', task })
+    res.json({ message: 'tarefa atualizada com sucesso', task })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      // Verifica se o erro é de não encontrar a tarefa
+      return res.status(404).json({ message: 'tarefa não encontrada' })
+    }
     console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
+    res.status(error.cause || 500).json({ message: `${error.message}` })
   }
 }
 
 export async function updateTaskStatus(req: Request, res: Response) {
   try {
-    const { id, status, completedDate, userId } = req.body
+    const { taskId, status, completedDate } = req.body
+    const { id } = req.body.context.user as Usuario
 
-    isNumber(id)
-    isNumber(userId)
-    await findUserError(userId)
+    isNumber(taskId)
 
     const task = await prisma.task.update({
       where: {
-        id: Number(id),
+        id: Number(taskId),
+        userId: Number(id),
       },
       data: {
         status,
@@ -202,20 +208,23 @@ export async function updateTaskStatus(req: Request, res: Response) {
     })
     res.json({ message: 'Tarefa atualizada com sucesso', task })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: 'tarefa não encontrada' })
+    }
     console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
+    res.status(error.cause || 500).json({ message: `${error.message}` })
   }
 }
 
 router.get('/', getTaskList)
 
-router.get('/:id', getTask)
+router.get('/:taskId', getTask)
 
 router.get('/busca/:search', searchTask)
 
 router.post('/add', addTask)
 
-router.delete('/:id', deleteTask)
+router.delete('/:taskId', deleteTask)
 
 router.post('/:id/update', updateTask)
 

@@ -1,17 +1,15 @@
 import express, { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
-import { findTagError, findTaskError, findUserError, isNumber } from '../utils'
+import { PrismaClient, Usuario } from '@prisma/client'
+import { isNumber } from '../utils'
 
 const prisma = new PrismaClient()
 
-async function getTagList(req: Request, res: Response) {
+async function getUserTagList(req: Request, res: Response) {
   try {
-    const { userId } = req.params as { userId: string }
-    isNumber(userId)
-    await findUserError(userId)
+    const { id } = req.body.context.user as Usuario
 
     const tags = await prisma.tag.findMany({
-      where: { userId: Number(userId) },
+      where: { userId: Number(id) },
     })
     res.json({ tags })
   } catch (error: any) {
@@ -22,15 +20,21 @@ async function getTagList(req: Request, res: Response) {
 
 async function getTag(req: Request, res: Response) {
   try {
-    const { id } = req.params as { id: string }
-    isNumber(id)
-    await findTagError(id)
+    const { tagId } = req.params as { tagId: string }
+    const { id } = req.body.context.user as Usuario
+
+    isNumber(tagId)
 
     const tag = await prisma.tag.findUnique({
       where: {
-        id: Number(id),
+        id: Number(tagId),
+        userId: id,
       },
     })
+    if (!tag) {
+      return res.status(404).json({ message: 'tag não encontrada' })
+    }
+
     res.json({ tag })
   } catch (error: any) {
     console.error(error)
@@ -40,14 +44,13 @@ async function getTag(req: Request, res: Response) {
 
 async function addTag(req: Request, res: Response) {
   try {
-    const { name, userId } = req.body
-    isNumber(userId)
-    await findUserError(userId)
+    const { name } = req.body
+    const { id } = req.body.context.user as Usuario
 
     const tag = await prisma.tag.create({
       data: {
         name,
-        userId: Number(userId),
+        userId: Number(id),
       },
     })
     res.json({ message: 'tag adicionada com sucesso', tag })
@@ -59,18 +62,24 @@ async function addTag(req: Request, res: Response) {
 
 async function updateTag(req: Request, res: Response) {
   try {
-    const { name, id } = req.body
-    isNumber(id)
-    await findTagError(id)
+    const { name, tagId } = req.body
+    const { id } = req.body.context.user as Usuario
+
+    isNumber(tagId)
 
     const tag = await prisma.tag.update({
       where: {
-        id: Number(id),
+        id: Number(tagId),
+        userId: id,
       },
       data: {
         name,
       },
     })
+    if (!tag) {
+      return res.status(404).json({ message: 'tag não encontrada' })
+    }
+
     res.json({ message: 'tag editada com sucesso', tag })
   } catch (error: any) {
     console.error(error)
@@ -80,84 +89,38 @@ async function updateTag(req: Request, res: Response) {
 
 async function deleteTag(req: Request, res: Response) {
   try {
-    const { id } = req.params as { id: string }
-    isNumber(id)
-    await findTagError(id)
+    const { tagId } = req.params as { tagId: string }
+    const { id } = req.body.context.user as Usuario
+
+    isNumber(tagId)
 
     const tag = await prisma.tag.delete({
       where: {
-        id: Number(id),
+        id: Number(tagId),
+        userId: id,
       },
     })
+
     res.json({ message: 'tag deletada com sucesso', tag })
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: 'tag não encontrada' })
+    }
     console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
-  }
-}
-
-async function addToTag(req: Request, res: Response) {
-  try {
-    const { taskId, tagId } = req.body
-    await findTaskError(taskId)
-    await findTagError(tagId)
-
-    const updatedTask = await prisma.task.update({
-      where: { id: Number(taskId) },
-      data: {
-        tags: {
-          connect: { id: Number(tagId) },
-        },
-      },
-    })
-    return res.json({
-      message: 'tag adicionada à tarefa com sucesso',
-      updatedTask,
-    })
-  } catch (error: any) {
-    console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
-  }
-}
-
-async function removeTag(req: Request, res: Response) {
-  try {
-    const { taskId, tagId } = req.body
-    await findTaskError(taskId)
-    await findTagError(tagId)
-
-    const updatedTask = await prisma.task.update({
-      where: { id: Number(taskId) },
-      data: {
-        tags: {
-          disconnect: { id: Number(tagId) },
-        },
-      },
-    })
-    return res.json({
-      message: 'tag removida da tarefa com sucesso',
-      updatedTask,
-    })
-  } catch (error: any) {
-    console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
+    res.status(error.cause || 500).json({ message: `${error.message}` })
   }
 }
 
 const router = express.Router()
 
-router.get('/usertaglist/:userId', getTagList)
+router.get('/usertaglist/:userId', getUserTagList)
 
-router.get('/:id', getTag)
+router.get('/:tagId', getTag)
 
 router.post('/add', addTag)
 
 router.put('/edit', updateTag)
 
-router.delete('/:id', deleteTag)
-
-router.post('/addtotag', addToTag)
-
-router.post('/removetag', removeTag)
+router.delete('/:tagId', deleteTag)
 
 export default router

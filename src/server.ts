@@ -17,10 +17,9 @@ app.use(express.json())
 
 app.use('/', session)
 app.use('/tasks', auth, tasks)
-app.use('/tasks', tasks)
 app.use('/user', users)
-app.use('/list', list)
-app.use('/tag', tag)
+app.use('/list', auth, list)
+app.use('/tag', auth, tag)
 
 export default app
 
