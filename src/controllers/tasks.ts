@@ -2,16 +2,21 @@ import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
 import { isNumber, isValidDate, timeZone } from '../utils'
 import { toZonedTime } from 'date-fns-tz'
+import {
+  completedDateValidation,
+  dateValidation,
+  numberValidation,
+} from 'src/validations'
 
 const prisma = new PrismaClient()
 const router = express.Router()
-
+//fazer validações para encontrar as tasks
 export async function getTaskList(req: Request, res: Response) {
   try {
     const { dueDate } = req.query as { userId: string; dueDate: string }
     const { id } = req.body.context.user as Usuario
 
-    isValidDate(dueDate)
+    dateValidation(dueDate)
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -34,8 +39,9 @@ export async function getTaskList(req: Request, res: Response) {
 export async function getTask(req: Request, res: Response) {
   try {
     const { taskId } = req.params as { taskId: string }
-    isNumber(taskId)
     const { id } = req.body.context.user as Usuario
+
+    numberValidation.parse(taskId)
 
     const task = await prisma.task.findUnique({
       where: {
@@ -83,7 +89,9 @@ export async function addTask(req: Request, res: Response) {
     const { title, dueDate, listId, tagId, description } = req.body
     const { id } = req.body.context.user as Usuario
 
-    isValidDate(dueDate)
+    dateValidation(dueDate)
+    numberValidation.parse(listId)
+    numberValidation.parse(tagId)
 
     const task = await prisma.task.create({
       data: {
@@ -92,7 +100,7 @@ export async function addTask(req: Request, res: Response) {
         dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
         userId: Number(id),
         description,
-        listId,
+        listId: Number(listId),
         ...(tagId && {
           tags: {
             connect: { id: Number(tagId) },
@@ -112,7 +120,7 @@ export async function deleteTask(req: Request, res: Response) {
     const { taskId } = req.params as { taskId: string }
     const { id } = req.body.context.user as Usuario
 
-    isNumber(taskId)
+    numberValidation.parse(taskId)
 
     const deletedTask = await prisma.task.delete({
       where: {
@@ -121,7 +129,7 @@ export async function deleteTask(req: Request, res: Response) {
       },
     })
 
-    return res.json({ message: 'Tarefa deletada com sucesso', deletedTask })
+    return res.json({ message: 'tarefa deletada com sucesso', deletedTask })
   } catch (error: any) {
     if (error.code === 'P2025') {
       // Verifica se o erro é de não encontrar a tarefa
@@ -144,8 +152,13 @@ export async function updateTask(req: Request, res: Response) {
       listId,
       tagId,
     } = req.body
-
     const { id } = req.body.context.user as Usuario
+
+    numberValidation.parse(taskId)
+    numberValidation.parse(listId)
+    numberValidation.parse(tagId)
+    //dateValidation(dueDate)
+    completedDateValidation(completedDate)
 
     const task = await prisma.task.update({
       where: {
@@ -176,7 +189,6 @@ export async function updateTask(req: Request, res: Response) {
     res.json({ message: 'tarefa atualizada com sucesso', task })
   } catch (error: any) {
     if (error.code === 'P2025') {
-      // Verifica se o erro é de não encontrar a tarefa
       return res.status(404).json({ message: 'tarefa não encontrada' })
     }
     console.error(error)
@@ -189,7 +201,8 @@ export async function updateTaskStatus(req: Request, res: Response) {
     const { taskId, status, completedDate } = req.body
     const { id } = req.body.context.user as Usuario
 
-    isNumber(taskId)
+    numberValidation.parse(taskId)
+    completedDateValidation(completedDate)
 
     const task = await prisma.task.update({
       where: {

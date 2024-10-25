@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { findListError, findTaskError, findUserError, isNumber } from '../utils'
+import { findListError, isNumber } from '../utils'
+import { numberValidation } from 'src/validations'
 
 const prisma = new PrismaClient()
 
@@ -23,7 +24,8 @@ export async function getList(req: Request, res: Response) {
     const { listId } = req.params as { listId: string }
     const { id } = req.body.context.user as Usuario
 
-    isNumber(listId)
+    numberValidation.parse(listId)
+
     const category = await prisma.list.findUnique({
       where: {
         id: Number(listId),
@@ -66,7 +68,7 @@ export async function updateList(req: Request, res: Response) {
     const { name, listId, color } = req.body
     const { id } = req.body.context.user as Usuario
 
-    isNumber(listId)
+    numberValidation.parse(listId)
     await findListError(listId)
 
     const category = await prisma.list.update({

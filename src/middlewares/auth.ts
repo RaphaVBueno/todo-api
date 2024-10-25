@@ -9,27 +9,41 @@ export default async function auth(
   res: Response,
   next: NextFunction
 ) {
-  const authHeader = req.headers.authorization
-  const tokenMatch = authHeader?.match(/^Bearer\s+(\S+)$/)
-  const token = tokenMatch ? tokenMatch[1] : ''
+  try {
+    const authHeader = req.headers.authorization
+    const tokenMatch = authHeader?.match(/^Bearer\s+(\S+)$/)
+    const token = tokenMatch ? tokenMatch[1] : ''
 
-  const decoded = jwt.verify(
-    token,
-    process.env.SECRET as string
-  ) as jwt.JwtPayload & { id: number }
+    if (!token) {
+      return res.status(401).json({ error: 'acesso negado' })
+    }
 
-  if (!decoded.id)
-    return res.status(401).json({ error: 'Acesso não autorizado' })
+    const decoded = jwt.verify(
+      token,
+      process.env.SECRET as string
+    ) as jwt.JwtPayload & { id: number }
 
-  const user = await prisma.usuario.findUnique({
-    where: {
-      id: decoded.id,
-    },
-  })
+    if (!decoded.id) {
+      return res.status(401).json({ error: 'acesso não autorizado' })
+    }
 
-  if (!user) return res.status(401).json({ error: 'Acesso não autorizado' })
+    const user = await prisma.usuario.findUnique({
+      where: {
+        id: decoded.id,
+      },
+    })
 
-  req.body.context = { user }
+    if (!user) {
+      return res.status(401).json({ error: 'usuário não encontrado' })
+    }
 
-  next()
+    req.body.context = { user }
+    next()
+  } catch (error: any) {
+    console.error('Erro de autenticação:', error)
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Token inválido ou expirado' })
+    }
+    res.status(500).json({ error: 'Erro interno no servidor' })
+  }
 }

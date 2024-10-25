@@ -1,13 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import {
-  addList,
-  updateList,
-  deleteList,
-  getListList,
-  getList,
-  addToList,
-  RemoveList,
-} from './list'
+import { addList } from './list'
 import { PrismaClient } from '@prisma/client'
 import { mockedList } from '../utils'
 
