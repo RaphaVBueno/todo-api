@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { isNumber } from '../utils'
+import { findTagError } from '../utils'
+import { numberValidation } from 'src/validations'
 
 const prisma = new PrismaClient()
 
@@ -23,7 +24,8 @@ async function getTag(req: Request, res: Response) {
     const { tagId } = req.params as { tagId: string }
     const { id } = req.body.context.user as Usuario
 
-    isNumber(tagId)
+    numberValidation.parse(tagId)
+    findTagError(tagId)
 
     const tag = await prisma.tag.findUnique({
       where: {
@@ -65,7 +67,8 @@ async function updateTag(req: Request, res: Response) {
     const { name, tagId } = req.body
     const { id } = req.body.context.user as Usuario
 
-    isNumber(tagId)
+    numberValidation.parse(tagId)
+    findTagError(tagId)
 
     const tag = await prisma.tag.update({
       where: {
@@ -92,7 +95,8 @@ async function deleteTag(req: Request, res: Response) {
     const { tagId } = req.params as { tagId: string }
     const { id } = req.body.context.user as Usuario
 
-    isNumber(tagId)
+    numberValidation.parse(tagId)
+    findTagError(tagId)
 
     const tag = await prisma.tag.delete({
       where: {

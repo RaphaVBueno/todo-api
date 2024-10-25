@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { isNumber, isValidDate, timeZone } from '../utils'
+import { findTaskError, timeZone } from '../utils'
 import { toZonedTime } from 'date-fns-tz'
 import {
   completedDateValidation,
@@ -10,7 +10,7 @@ import {
 
 const prisma = new PrismaClient()
 const router = express.Router()
-//fazer validações para encontrar as tasks
+
 export async function getTaskList(req: Request, res: Response) {
   try {
     const { dueDate } = req.query as { userId: string; dueDate: string }
@@ -42,6 +42,7 @@ export async function getTask(req: Request, res: Response) {
     const { id } = req.body.context.user as Usuario
 
     numberValidation.parse(taskId)
+    findTaskError(taskId)
 
     const task = await prisma.task.findUnique({
       where: {
@@ -121,6 +122,7 @@ export async function deleteTask(req: Request, res: Response) {
     const { id } = req.body.context.user as Usuario
 
     numberValidation.parse(taskId)
+    findTaskError(taskId)
 
     const deletedTask = await prisma.task.delete({
       where: {
@@ -159,6 +161,7 @@ export async function updateTask(req: Request, res: Response) {
     numberValidation.parse(tagId)
     //dateValidation(dueDate)
     completedDateValidation(completedDate)
+    findTaskError(taskId)
 
     const task = await prisma.task.update({
       where: {
@@ -203,6 +206,7 @@ export async function updateTaskStatus(req: Request, res: Response) {
 
     numberValidation.parse(taskId)
     completedDateValidation(completedDate)
+    findTaskError(taskId)
 
     const task = await prisma.task.update({
       where: {
