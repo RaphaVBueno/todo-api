@@ -26,7 +26,7 @@ export async function getTaskList(req: Request, res: Response) {
         ],
         userId: id,
       },
-      include: { tags: true },
+      include: { tags: true, list: true },
     })
 
     res.json({ tasks })

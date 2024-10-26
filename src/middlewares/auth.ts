@@ -40,7 +40,7 @@ export default async function auth(
     req.body.context = { user }
     next()
   } catch (error: any) {
-    console.error('Erro de autenticação:', error)
+    console.error('Erro de autenticação', error.message)
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ error: 'Token inválido ou expirado' })
     }

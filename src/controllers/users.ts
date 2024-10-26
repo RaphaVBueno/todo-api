@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Usuario } from '@prisma/client'
 import { findUserError, isNumber } from 'src/utils'
 import bcrypt from 'bcrypt'
+import { numberValidation } from 'src/validations'
+import { auth } from 'src/middlewares'
 
 const prisma = new PrismaClient()
 
@@ -18,12 +20,19 @@ export async function getUserList(req: Request, res: Response) {
 
 export async function getUser(req: Request, res: Response) {
   try {
-    const { id } = req.params as { id: string }
-    isNumber(id)
+    //const { id } = req.params as { id: string }
+    const { id } = req.body.context.user as Usuario
+
     await findUserError(id)
 
     const user = await prisma.usuario.findUnique({
       where: { id: Number(id) },
+      select: {
+        email: true,
+        name: true,
+        birthDate: true,
+        username: true,
+      },
     })
     res.json({ user })
   } catch (error: any) {
@@ -106,7 +115,7 @@ const router = express.Router()
 
 router.get('/', getUserList)
 
-router.get('/:id', getUser)
+router.get('/me', auth, getUser) // /me
 
 router.post('/add', addUser)
 
