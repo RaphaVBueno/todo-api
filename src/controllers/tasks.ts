@@ -1,12 +1,13 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { findTaskError, timeZone } from '../utils'
+import { findTaskError, timeZone, errorTreatment } from '../utils'
 import { toZonedTime } from 'date-fns-tz'
 import {
   completedDateValidation,
   dateValidation,
   numberValidation,
 } from 'src/validations'
+import { Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
 const router = express.Router()
@@ -133,9 +134,10 @@ export async function deleteTask(req: Request, res: Response) {
 
     return res.json({ message: 'tarefa deletada com sucesso', deletedTask })
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      // Verifica se o erro é de não encontrar a tarefa
-      return res.status(404).json({ message: 'tarefa não encontrada' })
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return res.status(errorTreatment[error.code].status).json({
+        message: `${error.meta?.target} ${errorTreatment[error.code].message}`,
+      })
     }
     console.error(error)
     res.status(error.cause || 500).json({ message: `${error.message}` })
@@ -206,7 +208,6 @@ export async function updateTaskStatus(req: Request, res: Response) {
 
     numberValidation.parse(taskId)
     completedDateValidation(completedDate)
-    findTaskError(taskId)
 
     const task = await prisma.task.update({
       where: {
@@ -225,8 +226,10 @@ export async function updateTaskStatus(req: Request, res: Response) {
     })
     res.json({ message: 'Tarefa atualizada com sucesso', task })
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ message: 'tarefa não encontrada' })
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return res.status(errorTreatment[error.code].status).json({
+        message: `tarefa ${errorTreatment[error.code].message}`,
+      })
     }
     console.error(error)
     res.status(error.cause || 500).json({ message: `${error.message}` })

@@ -93,3 +93,11 @@ export function isValidDate(dateString: string) {
 }
 
 // criar testes para tratamento de erros
+
+export const errorTreatment: Record<
+  string,
+  { message: string; status: number }
+> = {
+  P2025: { message: 'não econtrado(a)', status: 404 },
+  P2002: { message: 'já está em uso', status: 409 },
+}

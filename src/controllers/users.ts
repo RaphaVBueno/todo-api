@@ -1,13 +1,13 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { findUserError, isNumber } from 'src/utils'
+import { errorTreatment, findUserError, isNumber } from 'src/utils'
 import bcrypt from 'bcrypt'
 import { dateValidation, numberValidation } from 'src/validations'
 import { auth } from 'src/middlewares'
-import { aw } from 'vitest/dist/chunks/reporters.C_zwCd4j'
+import { Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
-
+//padronizar os todos erros em todas as entidades
 export async function getUserList(req: Request, res: Response) {
   try {
     req
@@ -21,7 +21,6 @@ export async function getUserList(req: Request, res: Response) {
 
 export async function getUser(req: Request, res: Response) {
   try {
-    //const { id } = req.params as { id: string }
     const { id } = req.body.context.user as Usuario
 
     await findUserError(id)
@@ -104,37 +103,33 @@ export async function deleteUser(req: Request, res: Response) {
 
 export async function updateUser(req: Request, res: Response) {
   try {
-    const { name, password } = req.body
-    let { email } = req.body
+    const { name, password, email, username } = req.body
     const { id } = req.body.context.user as Usuario
 
-    const userEmail = await prisma.usuario.findUnique({
-      where: { id },
-    })
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = password
+      ? await bcrypt.hash(password, salt)
+      : undefined
 
-    if (email === userEmail?.email) {
-      email = undefined
-    } else {
-      const existingEmail = await prisma.usuario.findUnique({
-        where: { email },
-      })
-      if (existingEmail)
-        return res.status(400).json({ message: 'email já está em uso.' })
-    }
-    //fazer a mesma logica com password
     const user = await prisma.usuario.update({
       where: { id },
       data: {
         name,
-        password,
+        password: hashedPassword,
         email,
+        username,
       },
     })
 
     res.json({ message: 'usuario atualizado com sucesso', user })
   } catch (error: any) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return res.status(errorTreatment[error.code].status).json({
+        message: `${error.meta?.target} ${errorTreatment[error.code].message}`,
+      })
+    }
     console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
+    res.status(error.cause || 500).json({ message: `${error.message}` })
   }
 }
 
