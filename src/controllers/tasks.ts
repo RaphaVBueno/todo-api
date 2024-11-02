@@ -102,7 +102,7 @@ export async function addTask(req: Request, res: Response) {
         dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
         userId: Number(id),
         description,
-        listId: Number(listId),
+        listId: listId ? Number(listId) : undefined,
         ...(tagId && {
           tags: {
             connect: { id: Number(tagId) },
@@ -160,7 +160,7 @@ export async function updateTask(req: Request, res: Response) {
 
     numberValidation.parse(taskId)
     numberValidation.parse(listId)
-    numberValidation.parse(tagId)
+    //numberValidation.parse(tagId)
     //dateValidation(dueDate)
     completedDateValidation(completedDate)
     findTaskError(taskId)
@@ -185,8 +185,8 @@ export async function updateTask(req: Request, res: Response) {
         tags:
           tagId === 9999999
             ? { set: [] }
-            : tagId
-            ? { connect: { id: Number(tagId) } }
+            : Array.isArray(tagId)
+            ? { connect: tagId.map((id: number) => ({ id: Number(id) })) }
             : undefined,
       },
     })
