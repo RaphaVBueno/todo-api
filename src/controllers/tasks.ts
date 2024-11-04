@@ -183,7 +183,7 @@ export async function updateTask(req: Request, res: Response) {
         dueDate: dueDate ? toZonedTime(new Date(dueDate), timeZone) : undefined,
         listId: listId ? Number(listId) : null,
         tags:
-          tagId === 9999999
+          Array.isArray(tagId) && tagId.length === 0
             ? { set: [] }
             : Array.isArray(tagId)
             ? { connect: tagId.map((id: number) => ({ id: Number(id) })) }
