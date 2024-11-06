@@ -93,7 +93,7 @@ export async function addTask(req: Request, res: Response) {
 
     dateValidation(dueDate)
     numberValidation.parse(listId)
-    numberValidation.parse(tagId)
+    //numberValidation.parse(tagId)
 
     const task = await prisma.task.create({
       data: {
@@ -104,9 +104,12 @@ export async function addTask(req: Request, res: Response) {
         description,
         listId: listId ? Number(listId) : undefined,
         ...(tagId && {
-          tags: {
-            connect: { id: Number(tagId) },
-          },
+          tags:
+            Array.isArray(tagId) && tagId.length === 0
+              ? { set: [] }
+              : Array.isArray(tagId)
+              ? { connect: tagId.map((id: number) => ({ id: Number(id) })) }
+              : undefined,
         }),
       },
     })
