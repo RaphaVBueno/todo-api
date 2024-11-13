@@ -77,6 +77,7 @@ export async function searchTask(req: Request, res: Response) {
         },
         userId: id,
       },
+      include: { tags: true, list: true },
     })
 
     return res.json({ tasks })
@@ -103,14 +104,9 @@ export async function addTask(req: Request, res: Response) {
         userId: Number(id),
         description,
         listId: listId ? Number(listId) : undefined,
-        ...(tagId && {
-          tags:
-            Array.isArray(tagId) && tagId.length === 0
-              ? { set: [] }
-              : Array.isArray(tagId)
-              ? { connect: tagId.map((id: number) => ({ id: Number(id) })) }
-              : undefined,
-        }),
+        tags: {
+          connect: tagId.map((id: number) => ({ id: Number(id) })),
+        },
       },
     })
     res.json({ message: 'tarefa adicionada com sucesso', task })
@@ -185,12 +181,9 @@ export async function updateTask(req: Request, res: Response) {
             : null,
         dueDate: dueDate ? toZonedTime(new Date(dueDate), timeZone) : undefined,
         listId: listId ? Number(listId) : null,
-        tags:
-          Array.isArray(tagId) && tagId.length === 0
-            ? { set: [] }
-            : Array.isArray(tagId)
-            ? { connect: tagId.map((id: number) => ({ id: Number(id) })) }
-            : undefined,
+        tags: Array.isArray(tagId)
+          ? { set: tagId.map((id: number) => ({ id: Number(id) })) }
+          : undefined,
       },
     })
 
