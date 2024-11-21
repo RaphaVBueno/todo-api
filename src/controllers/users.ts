@@ -106,19 +106,41 @@ export async function updateUser(req: Request, res: Response) {
     const { name, password, email, username } = req.body
     const { id } = req.body.context.user as Usuario
 
+    if (email) {
+      const existingEmail = await prisma.usuario.findUnique({
+        where: { email },
+      })
+
+      if (existingEmail && existingEmail.id !== id) {
+        return res.status(400).json({ message: 'e-mail já está em uso.' })
+      }
+    }
+
+    if (username) {
+      const existingUsername = await prisma.usuario.findUnique({
+        where: { username },
+      })
+
+      if (existingUsername && existingUsername.id !== id) {
+        return res
+          .status(400)
+          .json({ message: 'nome do usuário já está em uso.' })
+      }
+    }
+
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = password
       ? await bcrypt.hash(password, salt)
       : undefined
 
+    const updatedData: any = { name }
+    if (email) updatedData.email = email
+    if (username) updatedData.username = username
+    if (hashedPassword) updatedData.password = hashedPassword
+
     const user = await prisma.usuario.update({
       where: { id },
-      data: {
-        name,
-        password: hashedPassword,
-        email,
-        username,
-      },
+      data: updatedData,
     })
 
     res.json({ message: 'usuario atualizado com sucesso', user })
