@@ -122,7 +122,7 @@ export async function deleteTask(req: Request, res: Response) {
     const { id } = req.body.context.user as Usuario
 
     numberValidation.parse(taskId)
-    findTaskError(taskId)
+    //findTaskError(taskId) verificar essa função
 
     const deletedTask = await prisma.task.delete({
       where: {
