@@ -7,7 +7,6 @@ import { auth } from 'src/middlewares'
 import { Prisma } from '@prisma/client'
 
 const prisma = new PrismaClient()
-//padronizar os todos erros em todas as entidades
 export async function getUserList(req: Request, res: Response) {
   try {
     req
