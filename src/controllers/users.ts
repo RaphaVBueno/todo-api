@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import { dateValidation, numberValidation } from 'src/validations'
 import { auth } from 'src/middlewares'
 import { Prisma } from '@prisma/client'
+import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
 export async function getUserList(req: Request, res: Response) {
@@ -154,6 +155,33 @@ export async function updateUser(req: Request, res: Response) {
   }
 }
 
+async function newPassword(req: Request, res: Response) {
+  try {
+    const { id, password, token } = req.body
+
+    const decoded = jwt.verify(
+      token,
+      process.env.SECRET as string
+    ) as jwt.JwtPayload & { id: number }
+
+    if (!decoded.id) {
+      return res.status(401).json({ error: 'acesso não autorizado' })
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const changePassword = await prisma.usuario.update({
+      where: { id: Number(id) },
+      data: { password: hashedPassword },
+    })
+
+    return res.json({ message: 'Senha alterada com sucesso', changePassword })
+  } catch (error: any) {
+    console.error(error)
+    res.status(error.cause).json({ message: `${error.message}` })
+  }
+}
+
 const router = express.Router()
 
 router.get('/', getUserList)
@@ -165,5 +193,7 @@ router.post('/add', addUser)
 router.delete('/', deleteUser)
 
 router.put('/', auth, updateUser)
+
+router.put('/new-password', newPassword)
 
 export default router

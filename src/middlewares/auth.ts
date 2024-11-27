@@ -34,7 +34,7 @@ export default async function auth(
     })
 
     if (!user) {
-      return res.status(401).json({ error: 'usuário não encontrado' })
+      return res.status(404).json({ error: 'usuário não encontrado' })
     }
 
     req.body.context = { user }
