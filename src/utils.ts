@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { isValid, parse } from 'date-fns'
+import { NotFoundError } from './api.errors'
 
 const prisma = new PrismaClient()
 
@@ -52,7 +53,7 @@ export async function findTaskError(taskId: number | string) {
     where: { id: Number(taskId) },
   })
   if (!findTask) {
-    throw new Error('tarefa não encontrada', { cause: 404 })
+    throw new NotFoundError('tarefa não encontrada')
   }
   return findTask
 }

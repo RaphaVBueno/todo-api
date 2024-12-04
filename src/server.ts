@@ -1,3 +1,4 @@
+import 'express-async-errors'
 import express from 'express'
 import cors from 'cors'
 
@@ -6,7 +7,8 @@ import users from './controllers/users'
 import list from './controllers/list'
 import tag from './controllers/tag'
 import session from './controllers/session'
-import { logger, auth } from './middlewares'
+import { auth } from './middlewares'
+import { errorMiddleware } from './middlewares/error'
 
 const app = express()
 
@@ -21,10 +23,11 @@ app.use('/user', users)
 app.use('/list', auth, list)
 app.use('/tag', auth, tag)
 
-export default app
+app.use(errorMiddleware)
 
 const port = 3000
-
 app.listen(port, () => {
   console.log('Servidor rodando em http://localhost:' + port)
 })
+
+export default app
