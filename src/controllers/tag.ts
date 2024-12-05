@@ -1,118 +1,90 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { findTagError, findUserError } from '../utils'
 import { numberValidation } from 'src/validations'
+import { NotFoundError } from 'src/api.errors'
+
+interface AuthenticatedRequest extends Request {
+  context?: {
+    user: any // tive q fazer isso depois da atualização
+  }
+}
 
 const prisma = new PrismaClient()
 
-async function getUserTagList(req: Request, res: Response) {
-  try {
-    const { id } = req.body.context.user as Usuario
+async function getUserTagList(req: AuthenticatedRequest, res: Response) {
+  const { id } = req.context?.user as Usuario
 
-    const tags = await prisma.tag.findMany({
-      where: { userId: Number(id) },
-    })
-    res.json({ tags })
-  } catch (error: any) {
-    console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
-  }
+  const tags = await prisma.tag.findMany({
+    where: { userId: Number(id) },
+  })
+  res.json({ tags })
 }
 
-async function getTag(req: Request, res: Response) {
-  try {
-    const { tagId } = req.params as { tagId: string }
-    const { id } = req.body.context.user as Usuario
+async function getTag(req: AuthenticatedRequest, res: Response) {
+  const { tagId } = req.params as { tagId: string }
+  const { id } = req.context?.user as Usuario
 
-    numberValidation.parse(tagId)
-    findTagError(tagId)
+  numberValidation(tagId)
 
-    const tag = await prisma.tag.findUnique({
-      where: {
-        id: Number(tagId),
-        userId: id,
-      },
-    })
-    if (!tag) {
-      return res.status(404).json({ message: 'tag não encontrada' })
-    }
-
-    res.json({ tag })
-  } catch (error: any) {
-    console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
+  const tag = await prisma.tag.findUnique({
+    where: {
+      id: Number(tagId),
+      userId: id,
+    },
+  })
+  if (!tag) {
+    throw new NotFoundError('tag não encontrada')
   }
+
+  res.json({ tag })
 }
 
-async function addTag(req: Request, res: Response) {
-  try {
-    const { name } = req.body
-    const { id } = req.body.context.user as Usuario
+async function addTag(req: AuthenticatedRequest, res: Response) {
+  const { name } = req.body
+  const { id } = req.context?.user as Usuario
 
-    const tag = await prisma.tag.create({
-      data: {
-        name,
-        userId: Number(id),
-      },
-    })
-    res.json({ message: 'tag adicionada com sucesso', tag })
-  } catch (error: any) {
-    console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
-  }
+  const tag = await prisma.tag.create({
+    data: {
+      name,
+      userId: Number(id),
+    },
+  })
+  res.json({ message: 'tag adicionada com sucesso', tag })
 }
 
-async function updateTag(req: Request, res: Response) {
-  try {
-    const { name, tagId } = req.body
-    const { id } = req.body.context.user as Usuario
+async function updateTag(req: AuthenticatedRequest, res: Response) {
+  const { name, tagId } = req.body
+  const { id } = req.context?.user as Usuario
 
-    numberValidation.parse(tagId)
-    findTagError(tagId)
+  numberValidation(tagId)
 
-    const tag = await prisma.tag.update({
-      where: {
-        id: Number(tagId),
-        userId: id,
-      },
-      data: {
-        name,
-      },
-    })
-    if (!tag) {
-      return res.status(404).json({ message: 'tag não encontrada' })
-    }
+  const tag = await prisma.tag.update({
+    where: {
+      id: Number(tagId),
+      userId: id,
+    },
+    data: {
+      name,
+    },
+  })
 
-    res.json({ message: 'tag editada com sucesso', tag })
-  } catch (error: any) {
-    console.error(error)
-    res.status(error.cause).json({ message: `${error.message}` })
-  }
+  res.json({ message: 'tag editada com sucesso', tag })
 }
 
-async function deleteTag(req: Request, res: Response) {
-  try {
-    const { tagId } = req.params as { tagId: string }
-    const { id } = req.body.context.user as Usuario
+async function deleteTag(req: AuthenticatedRequest, res: Response) {
+  const { tagId } = req.params as { tagId: string }
+  const { id } = req.context?.user as Usuario
 
-    numberValidation.parse(tagId)
-    findTagError(tagId)
+  numberValidation(tagId)
 
-    const tag = await prisma.tag.delete({
-      where: {
-        id: Number(tagId),
-        userId: id,
-      },
-    })
+  const tag = await prisma.tag.delete({
+    where: {
+      id: Number(tagId),
+      userId: id,
+    },
+  })
 
-    res.json({ message: 'tag deletada com sucesso', tag })
-  } catch (error: any) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({ message: 'tag não encontrada' })
-    }
-    console.error(error)
-    res.status(error.cause || 500).json({ message: `${error.message}` })
-  }
+  res.json({ message: 'tag deletada com sucesso', tag })
 }
 
 const router = express.Router()

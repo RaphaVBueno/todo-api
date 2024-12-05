@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { findTaskError, timeZone } from '../utils'
+import { timeZone } from '../utils'
 import { toZonedTime } from 'date-fns-tz'
 import {
   completedDateValidation,
@@ -8,14 +8,20 @@ import {
   numberValidation,
 } from 'src/validations'
 
-import { BadRequestError, NotFoundError } from 'src/api.errors'
+import { NotFoundError } from 'src/api.errors'
+
+interface AuthenticatedRequest extends Request {
+  context?: {
+    user: any // tive q fazer isso depois da atualização
+  }
+}
 
 const prisma = new PrismaClient()
 const router = express.Router()
 
-export async function getTaskList(req: Request, res: Response) {
+export async function getTaskList(req: AuthenticatedRequest, res: Response) {
   const { dueDate } = req.query as { userId: string; dueDate: string }
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   dateValidation(dueDate)
 
@@ -33,9 +39,9 @@ export async function getTaskList(req: Request, res: Response) {
   res.json({ tasks })
 }
 
-export async function getTask(req: Request, res: Response) {
+export async function getTask(req: AuthenticatedRequest, res: Response) {
   const { taskId } = req.params as { taskId: string }
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   numberValidation(taskId)
 
@@ -54,9 +60,9 @@ export async function getTask(req: Request, res: Response) {
   res.json({ task })
 }
 
-export async function searchTask(req: Request, res: Response) {
+export async function searchTask(req: AuthenticatedRequest, res: Response) {
   const { search } = req.params as { search: string }
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   const tasks = await prisma.task.findMany({
     where: {
@@ -72,66 +78,59 @@ export async function searchTask(req: Request, res: Response) {
   return res.json({ tasks })
 }
 
-export async function addTask(req: Request, res: Response) {
+export async function addTask(req: AuthenticatedRequest, res: Response) {
   const { title, dueDate, listId, tagId, description } = req.body
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   dateValidation(dueDate)
   numberValidation(listId)
   //numberValidation(tagId) //verificar como validar um array de numeros
-  try {
-    const taskData: any = {
-      title,
-      status: false,
-      dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
-      userId: Number(id),
-      description,
-      listId: listId ? Number(listId) : undefined,
-    }
 
-    if (tagId) {
-      if (Array.isArray(tagId)) {
-        taskData.tags = {
-          connect: tagId.map((id: number) => ({ id: Number(id) })),
-        }
-      } else {
-        taskData.tags = {
-          connect: [{ id: Number(tagId) }],
-        }
+  const taskData: any = {
+    title,
+    status: false,
+    dueDate: dueDate && toZonedTime(new Date(dueDate), timeZone),
+    userId: Number(id),
+    description,
+    listId: listId ? Number(listId) : undefined,
+  }
+
+  if (tagId) {
+    if (Array.isArray(tagId)) {
+      taskData.tags = {
+        connect: tagId.map((id: number) => ({ id: Number(id) })),
+      }
+    } else {
+      taskData.tags = {
+        connect: [{ id: Number(tagId) }],
       }
     }
-
-    const task = await prisma.task.create({
-      data: taskData,
-    })
-
-    res.json({ message: 'Tarefa adicionada com sucesso', task })
-  } catch (error) {
-    console.error(error)
-    throw new BadRequestError('Erro ao adicionar tarefa')
   }
+
+  const task = await prisma.task.create({
+    data: taskData,
+  })
+
+  res.json({ message: 'Tarefa adicionada com sucesso', task })
 }
 
-export async function deleteTask(req: Request, res: Response) {
+export async function deleteTask(req: AuthenticatedRequest, res: Response) {
   const { taskId } = req.params as { taskId: string }
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   numberValidation(taskId)
-  try {
-    const deletedTask = await prisma.task.delete({
-      where: {
-        id: Number(taskId),
-        userId: id,
-      },
-    })
 
-    return res.json({ message: 'tarefa deletada com sucesso', deletedTask })
-  } catch (error: any) {
-    throw new NotFoundError('tarefa não encontrada')
-  }
+  const deletedTask = await prisma.task.delete({
+    where: {
+      id: Number(taskId),
+      userId: id,
+    },
+  })
+
+  return res.json({ message: 'tarefa deletada com sucesso', deletedTask })
 }
 
-export async function updateTask(req: Request, res: Response) {
+export async function updateTask(req: AuthenticatedRequest, res: Response) {
   const {
     taskId,
     status,
@@ -142,72 +141,66 @@ export async function updateTask(req: Request, res: Response) {
     listId,
     tagId,
   } = req.body
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   numberValidation(taskId)
   numberValidation(listId)
   //numberValidation.parse(tagId)
   dateValidation(dueDate)
   completedDateValidation(completedDate)
-  findTaskError(taskId)
 
-  try {
-    const task = await prisma.task.update({
-      where: {
-        id: Number(taskId),
-        userId: Number(id),
-      },
-      data: {
-        status,
-        description,
-        title,
-        completedDate:
-          status && !completedDate
-            ? new Date()
-            : completedDate
-            ? new Date(completedDate)
-            : null,
-        dueDate: dueDate ? toZonedTime(new Date(dueDate), timeZone) : undefined,
-        listId: listId ? Number(listId) : null,
-        tags: Array.isArray(tagId)
-          ? { set: tagId.map((id: number) => ({ id: Number(id) })) }
-          : undefined,
-      },
-    })
+  const task = await prisma.task.update({
+    where: {
+      id: Number(taskId),
+      userId: Number(id),
+    },
+    data: {
+      status,
+      description,
+      title,
+      completedDate:
+        status && !completedDate
+          ? new Date()
+          : completedDate
+          ? new Date(completedDate)
+          : null,
+      dueDate: dueDate ? toZonedTime(new Date(dueDate), timeZone) : undefined,
+      listId: listId ? Number(listId) : null,
+      tags: Array.isArray(tagId)
+        ? { set: tagId.map((id: number) => ({ id: Number(id) })) }
+        : undefined,
+    },
+  })
 
-    res.json({ message: 'tarefa atualizada com sucesso', task })
-  } catch (error: any) {
-    throw new BadRequestError('erro ao atualizar tarefa')
-  }
+  res.json({ message: 'tarefa atualizada com sucesso', task })
 }
 
-export async function updateTaskStatus(req: Request, res: Response) {
+export async function updateTaskStatus(
+  req: AuthenticatedRequest,
+  res: Response
+) {
   const { taskId, status, completedDate } = req.body
-  const { id } = req.body.context.user as Usuario
+  const { id } = req.context?.user as Usuario
 
   numberValidation(taskId)
   completedDateValidation(completedDate)
 
-  try {
-    const task = await prisma.task.update({
-      where: {
-        id: Number(taskId),
-        userId: Number(id),
-      },
-      data: {
-        status,
-        completedDate:
-          status && !completedDate
-            ? new Date()
-            : completedDate
-            ? new Date(completedDate)
-            : null,
-      },
-    })
-    res.json({ message: 'Tarefa atualizada com sucesso', task })
-  } catch (error: any) {
-    throw new BadRequestError('erro ao atualizar status da tarefa')
-  }
+  const task = await prisma.task.update({
+    where: {
+      id: Number(taskId),
+      userId: Number(id),
+    },
+    data: {
+      status,
+      completedDate:
+        status && !completedDate
+          ? new Date()
+          : completedDate
+          ? new Date(completedDate)
+          : null,
+    },
+  })
+  res.json({ message: 'Tarefa atualizada com sucesso', task })
 }
 
 router.get('/', getTaskList)

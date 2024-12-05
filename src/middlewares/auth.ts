@@ -4,8 +4,14 @@ import jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
 
+interface AuthenticatedRequest extends Request {
+  context?: {
+    user: any // Substitua `any` pelo tipo correto do seu usuário
+  }
+}
+
 export default async function auth(
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -37,7 +43,7 @@ export default async function auth(
       return res.status(404).json({ error: 'usuário não encontrado' })
     }
 
-    req.body.context = { user }
+    req.context = { user }
     next()
   } catch (error: any) {
     console.error('Erro de autenticação', error.message)
