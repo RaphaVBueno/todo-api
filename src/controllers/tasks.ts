@@ -146,7 +146,7 @@ export async function updateTask(req: AuthenticatedRequest, res: Response) {
   numberValidation(taskId)
   numberValidation(listId)
   //numberValidation.parse(tagId)
-  dateValidation(dueDate)
+  completedDateValidation(dueDate)
   completedDateValidation(completedDate)
 
   const task = await prisma.task.update({
