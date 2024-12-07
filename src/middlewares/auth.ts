@@ -1,12 +1,14 @@
 import type { Request, Response, NextFunction } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Usuario } from '@prisma/client'
 import jwt from 'jsonwebtoken'
+
+import { UnauthorizedError } from 'src/api.errors'
 
 const prisma = new PrismaClient()
 
 interface AuthenticatedRequest extends Request {
   context?: {
-    user: any // Substitua `any` pelo tipo correto do seu usuário
+    user: Usuario
   }
 }
 
@@ -52,4 +54,17 @@ export default async function auth(
     }
     res.status(500).json({ error: 'Erro interno no servidor' })
   }
+}
+
+export function adminOnly(
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+) {
+  const role = req.context?.user.role
+
+  if (!role || role !== 'ADMIN')
+    throw new UnauthorizedError('Acessso não autorizado')
+
+  next()
 }

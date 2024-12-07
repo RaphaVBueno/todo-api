@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import { dateValidation, numberValidation } from 'src/validations'
-import { auth } from 'src/middlewares'
+import { auth, adminOnly } from 'src/middlewares'
 import jwt from 'jsonwebtoken'
 
 interface AuthenticatedRequest extends Request {
@@ -13,15 +13,9 @@ interface AuthenticatedRequest extends Request {
 
 const prisma = new PrismaClient()
 
-export async function getUserList(req: Request, res: Response) {
-  try {
-    req
-    const users = await prisma.usuario.findMany()
-    res.json({ users })
-  } catch (error: any) {
-    console.error(error)
-    res.status(500).json({ message: `erro na consulta de usuários` })
-  }
+export async function getUserList(_req: Request, res: Response) {
+  const users = await prisma.usuario.findMany()
+  res.json({ users })
 }
 
 export async function getUser(req: AuthenticatedRequest, res: Response) {
@@ -34,6 +28,7 @@ export async function getUser(req: AuthenticatedRequest, res: Response) {
       name: true,
       birthDate: true,
       username: true,
+      role: true,
     },
   })
   res.json({ user })
@@ -159,7 +154,7 @@ async function newPassword(req: Request, res: Response) {
 
 const router = express.Router()
 
-router.get('/', getUserList)
+router.get('/', auth, adminOnly, getUserList)
 
 router.get('/me', auth, getUser)
 

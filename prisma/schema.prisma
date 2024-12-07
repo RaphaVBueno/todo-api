@@ -14,15 +14,16 @@ datasource db {
 }
 
 model Usuario {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  name     String
-  username   String    @unique
-  password String
-  birthDate  DateTime?          
-  tasks    Task[]
-  lists    List[]
-  tags     Tag[]
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String
+  username  String    @unique
+  password  String
+  birthDate DateTime?
+  tasks     Task[]
+  lists     List[]
+  tags      Tag[]
+  role      Role      @default(USER)
 
   @@map("users")
 }
@@ -62,4 +63,9 @@ model Tag {
   userId Int
 
   @@map("tags")
+}
+
+enum Role {
+  USER
+  ADMIN
 }

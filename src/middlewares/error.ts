@@ -4,9 +4,9 @@ import { ApiError } from 'src/api.errors'
 
 export const errorMiddleware = (
   error: Error & Partial<ApiError>,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   console.log(error)
 
