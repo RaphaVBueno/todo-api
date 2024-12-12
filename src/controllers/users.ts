@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import { dateValidation, numberValidation } from 'src/validations'
-import { auth, adminOnly } from 'src/middlewares'
+import { auth, adminOnly, superAdminOnly } from 'src/middlewares'
 import jwt from 'jsonwebtoken'
 
 interface AuthenticatedRequest extends Request {
@@ -152,6 +152,17 @@ async function newPassword(req: Request, res: Response) {
   }
 }
 
+async function updateRole(req: AuthenticatedRequest, res: Response) {
+  const { newRole, userId } = req.body
+
+  const updatedUser = await prisma.usuario.update({
+    where: { id: Number(userId) },
+    data: { role: newRole },
+  })
+
+  return res.json({ message: 'Permissão do usuário atualizada' })
+}
+
 const router = express.Router()
 
 router.get('/', auth, adminOnly, getUserList)
@@ -160,10 +171,12 @@ router.get('/me', auth, getUser)
 
 router.post('/add', addUser)
 
-router.delete('/', deleteUser)
+router.delete('/', auth, adminOnly, deleteUser)
 
 router.put('/', auth, updateUser)
 
 router.put('/new-password', newPassword)
+
+router.put('/change-role', auth, superAdminOnly, updateRole)
 
 export default router

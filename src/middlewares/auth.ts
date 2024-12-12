@@ -63,8 +63,23 @@ export function adminOnly(
 ) {
   const role = req.context?.user.role
 
-  if (!role || role !== 'ADMIN')
+  if (!role || (role !== 'ADMIN' && role !== 'SUPERADMIN'))
     throw new UnauthorizedError('Acessso não autorizado')
+
+  next()
+}
+
+export function superAdminOnly(
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+) {
+  const role = req.context?.user.role
+
+  if (!role || role !== 'SUPERADMIN')
+    throw new UnauthorizedError(
+      'Acessso não autorizado vc não é um super admin'
+    )
 
   next()
 }
