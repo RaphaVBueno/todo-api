@@ -6,6 +6,7 @@ import users from './controllers/users'
 import list from './controllers/list'
 import tag from './controllers/tag'
 import session from './controllers/session'
+import upload from './controllers/upload'
 import { auth } from './middlewares'
 import { errorMiddleware } from './middlewares/error'
 
@@ -21,6 +22,7 @@ app.use('/tasks', auth, tasks)
 app.use('/user', users)
 app.use('/list', auth, list)
 app.use('/tag', auth, tag)
+app.use('/upload', auth, upload)
 
 app.use(errorMiddleware)
 

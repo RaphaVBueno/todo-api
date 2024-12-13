@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken'
 
 interface AuthenticatedRequest extends Request {
   context?: {
-    user: any // tive q fazer isso depois da atualização
+    user: any
   }
 }
 
