@@ -20,7 +20,7 @@ const prisma = new PrismaClient()
 const router = express.Router()
 
 export async function getTaskList(req: AuthenticatedRequest, res: Response) {
-  const { dueDate } = req.query as { userId: string; dueDate: string }
+  const { dueDate } = req.query as { dueDate: string }
   const { id } = req.context?.user as Usuario
 
   dateValidation(dueDate)
@@ -111,7 +111,7 @@ export async function addTask(req: AuthenticatedRequest, res: Response) {
     data: taskData,
   })
 
-  res.json({ message: 'Tarefa adicionada com sucesso', task })
+  res.json({ message: 'tarefa adicionada com sucesso', task })
 }
 
 export async function deleteTask(req: AuthenticatedRequest, res: Response) {
@@ -200,7 +200,7 @@ export async function updateTaskStatus(
           : null,
     },
   })
-  res.json({ message: 'Tarefa atualizada com sucesso', task })
+  res.json({ message: 'tarefa atualizada com sucesso', task })
 }
 
 router.get('/', getTaskList)

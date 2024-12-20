@@ -85,7 +85,7 @@ export async function deleteList(req: AuthenticatedRequest, res: Response) {
       userId: id,
     },
   })
-  res.json({ message: 'Categoria deletada com sucesso', category })
+  res.json({ message: 'categoria deletada com sucesso', category })
 }
 
 const router = express.Router()
