@@ -14,6 +14,8 @@ const app = express()
 
 app.use(cors())
 
+app.use('/static', express.static('uploads'))
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
