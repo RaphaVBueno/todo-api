@@ -10,10 +10,10 @@ interface AuthenticatedRequest extends Request {
 }
 
 export const storage = multer.diskStorage({
-  destination: (req: Request, file, callback) => {
+  destination: (__req: Request, __file, callback) => {
     callback(null, path.resolve('uploads'))
   },
-  filename: (req: AuthenticatedRequest, file, callback) => {
+  filename: (req: AuthenticatedRequest, _file, callback) => {
     const { username } = req.context?.user as Usuario
 
     callback(null, `perfilImage_${username}.jpg`)

@@ -159,7 +159,7 @@ async function updateRole(req: AuthenticatedRequest, res: Response) {
     where: { id: Number(userId) },
     data: { role: newRole },
   })
-
+  console.log(updatedUser)
   return res.json({ message: 'Permissão do usuário atualizada' })
 }
 

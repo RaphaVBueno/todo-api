@@ -11,7 +11,7 @@ interface AuthenticatedRequest extends Request {
 const uploadFile = multer({ storage: storage })
 const router = express.Router()
 
-function uploadImage(req: AuthenticatedRequest, res: Response) {
+function uploadImage(__req: AuthenticatedRequest, res: Response) {
   return res.json({ message: 'arquivo salvo com sucesso' })
 }
 
