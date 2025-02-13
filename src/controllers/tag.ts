@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { numberValidation } from 'src/validations'
-import { NotFoundError } from 'src/api.errors'
+
+import { NotFoundError } from '../api.errors.js'
+import { numberValidation } from '../validations.js'
 
 interface AuthenticatedRequest extends Request {
   context?: {

@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import multer from 'multer'
-import { storage } from 'multerConfig'
+import { storage } from '../../multerConfig.js'
 
 interface AuthenticatedRequest extends Request {
   context?: {

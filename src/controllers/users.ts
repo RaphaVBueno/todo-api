@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
 import bcrypt from 'bcrypt'
-import { dateValidation, numberValidation } from 'src/validations'
-import { auth, adminOnly, superAdminOnly } from 'src/middlewares'
+import { dateValidation, numberValidation } from '../validations.js'
+
 import jwt from 'jsonwebtoken'
+import auth, { adminOnly, superAdminOnly } from '../middlewares/auth.js'
 
 interface AuthenticatedRequest extends Request {
   context?: {

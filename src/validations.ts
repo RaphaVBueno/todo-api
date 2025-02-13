@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BadRequestError } from './api.errors'
+import { BadRequestError } from './api.errors.js'
 
 export const numberValidation = (value: any): number | undefined => {
   try {

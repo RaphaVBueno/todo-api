@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import express, { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
-import { send } from 'src/services/mailer'
+import { send } from '../services/mailer.js'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -47,7 +47,7 @@ async function tokenGenerate(req: Request, res: Response) {
   const token = jwt.sign({ id: user.id }, process.env.SECRET as string)
 
   try {
-    send(email, token) //função que manda o email
+    send(email, token)
     return res.json({
       message:
         'Se o e-mail informado estiver correto, você receberá nossa mensagem em instantes. Não se esqueça de verificar também sua caixa de spam.',

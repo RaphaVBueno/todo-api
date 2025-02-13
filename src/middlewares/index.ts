@@ -1,3 +1,3 @@
-export { default as logger } from './logger'
-export { default as auth } from './auth'
-export * from './auth'
+export { default as logger } from './logger.js'
+export { default as auth } from './auth.js'
+export * from './auth.js'

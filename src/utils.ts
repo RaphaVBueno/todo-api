@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { isValid, parse } from 'date-fns'
-import { NotFoundError } from './api.errors'
+import { NotFoundError } from './api.errors.js'
 
 const prisma = new PrismaClient()
 

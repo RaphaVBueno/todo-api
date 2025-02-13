@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import request from 'supertest'
-import app from '../server'
+import app from '../server.js'
 
 const validToken =
   'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjMsImlhdCI6MTczNDY0ODg3Mn0.OH9HI2agPpaaI_QBpBHslvG46u3utCt6tLWw8wK79JU'

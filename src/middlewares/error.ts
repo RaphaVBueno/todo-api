@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { NextFunction, Request, Response } from 'express'
-import { ApiError } from 'src/api.errors'
+import { ApiError } from '../api.errors.js'
 
 export const errorMiddleware = (
   error: Error & Partial<ApiError>,

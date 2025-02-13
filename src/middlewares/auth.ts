@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 
-import { UnauthorizedError } from 'src/api.errors'
+import { UnauthorizedError } from '../api.errors.js'
 
 const prisma = new PrismaClient()
 

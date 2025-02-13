@@ -1,14 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 
-import tasks from './controllers/tasks'
-import users from './controllers/users'
-import list from './controllers/list'
-import tag from './controllers/tag'
-import session from './controllers/session'
-import upload from './controllers/upload'
-import { auth } from './middlewares'
-import { errorMiddleware } from './middlewares/error'
+import tasks from './controllers/tasks.js'
+import users from './controllers/users.js'
+import list from './controllers/list.js'
+import tag from './controllers/tag.js'
+import session from './controllers/session.js'
+import upload from './controllers/upload.js'
+import { auth } from './middlewares/index.js'
+import { errorMiddleware } from './middlewares/error.js'
 
 const app = express()
 

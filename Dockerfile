@@ -11,6 +11,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+ENV SECRET="Brasil sem Neymar não da"
 
 
 # Throw-away build stage to reduce size of final image
@@ -45,4 +46,4 @@ COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]

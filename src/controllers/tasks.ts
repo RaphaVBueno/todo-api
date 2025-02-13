@@ -1,14 +1,14 @@
 import express, { Request, Response } from 'express'
 import { PrismaClient, Usuario } from '@prisma/client'
-import { timeZone } from '../utils'
+import { timeZone } from '../utils.js'
 import { toZonedTime } from 'date-fns-tz'
 import {
   completedDateValidation,
   dateValidation,
   numberValidation,
-} from 'src/validations'
+} from '../validations.js'
 
-import { NotFoundError } from 'src/api.errors'
+import { NotFoundError } from '../api.errors.js'
 
 interface AuthenticatedRequest extends Request {
   context?: {
