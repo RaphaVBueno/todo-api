@@ -72,7 +72,7 @@ O frontend deste projeto está disponível em outro repositório. Ele foi desenv
 - **React Hook Form**
 - **TanStack React Query**
 
-Link para o repositório do frontend: [Frontend Repository](https://github.com/bueno-devs/todo-app)
+Link para o repositório do frontend: [Frontend Repository](https://github.com/RaphaVBueno/todo-app)
 
 ## 📜 Licença
 
